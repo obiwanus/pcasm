@@ -51,7 +51,7 @@ segment .bss
 input1  resd 1
 input2  resd 1
 
- 
+
 
 ;
 ; code is put in the .text segment
@@ -84,7 +84,7 @@ asm_main:
 ;
         mov     eax, outmsg1
         call    print_string      ; print out first message
-        mov     eax, [input1]     
+        mov     eax, [input1]
         call    print_int         ; print out input1
         mov     eax, outmsg2
         call    print_string      ; print out second message
@@ -98,7 +98,7 @@ asm_main:
 
         popa
         mov     eax, 0            ; return back to C
-        leave                     
+        leave
         ret
 
 
