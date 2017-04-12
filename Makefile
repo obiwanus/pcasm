@@ -21,10 +21,10 @@ first: driver.o first.o asm_io.o
 
 first.o: asm_io.inc first.asm
 
-testmul: driver.o testmul.o asm_io.o
-	$(CC) $(CFLAGS) -otestmul.out driver.o testmul.o asm_io.o
+test: driver.o test.o asm_io.o
+	$(CC) $(CFLAGS) -otestmul.out driver.o test.o asm_io.o
 
-testmul.o: asm_io.inc testmul.asm
+test.o: asm_io.inc test.asm
 
 prime: driver.o prime.o asm_io.o
 	$(CC) $(CFLAGS) -oprime.out driver.o prime.o asm_io.o
