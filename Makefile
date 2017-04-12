@@ -13,6 +13,9 @@ CC=gcc
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
 
+asm_io.o : asm_io.asm
+	$(AS) $(ASFLAGS) -d ELF_TYPE asm_io.asm
+
 first: driver.o first.o asm_io.o
 	$(CC) $(CFLAGS) -ofirst.out driver.o first.o asm_io.o
 
@@ -23,8 +26,12 @@ testmul: driver.o testmul.o asm_io.o
 
 testmul.o: asm_io.inc testmul.asm
 
-asm_io.o : asm_io.asm
-	$(AS) $(ASFLAGS) -d ELF_TYPE asm_io.asm
+prime: driver.o prime.o asm_io.o
+	$(CC) $(CFLAGS) -oprime.out driver.o prime.o asm_io.o
+
+prime.o: asm_io.inc prime.asm
+
+
 
 clean :
 	rm *.o
