@@ -18,6 +18,10 @@ first: driver.o first.o asm_io.o
 
 first.o: asm_io.inc first.asm
 
+testmul: driver.o testmul.o asm_io.o
+	$(CC) $(CFLAGS) -otestmul.out driver.o testmul.o asm_io.o
+
+testmul.o: asm_io.inc testmul.asm
 
 asm_io.o : asm_io.asm
 	$(AS) $(ASFLAGS) -d ELF_TYPE asm_io.asm

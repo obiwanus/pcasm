@@ -24,7 +24,7 @@
 
 %macro  dump_stack 3
     push     dword %3
-        push     dword %2
+    push     dword %2
     push     dword %1
-        call     sub_dump_stack
+    call     sub_dump_stack
 %endmacro

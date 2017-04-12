@@ -77,8 +77,8 @@ asm_main:
         mov     eax, [input1]     ; eax = dword at input1
         add     eax, [input2]     ; eax += dword at input2
         mov     ebx, eax          ; ebx = eax
-        dump_regs 1               ; dump out register values
-        dump_mem 2, outmsg1, 1    ; dump out memory
+        ; dump_regs 1               ; dump out register values
+        ; dump_mem 2, outmsg1, 1    ; dump out memory
 ;
 ; next print out result message as series of steps
 ;
