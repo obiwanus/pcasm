@@ -1,36 +1,23 @@
 .SUFFIXES:
-.SUFFIXES: .o .asm .cpp .c
+.SUFFIXES: .o .asm .cpp .c .out
 
 AS=nasm
-ASFLAGS= -f elf
+ASFLAGS= -f elf -d ELF_TYPE
 CFLAGS= -m32
 CC=gcc
 
 
-%.o : %.asm
+%.o : %.asm asm_io.o
 	$(AS) $(ASFLAGS) $<
+
+%.out : %.o
+	$(CC) $(CFLAGS) -o $@ driver.c $< asm_io.o
 
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
 
 asm_io.o : asm_io.asm
-	$(AS) $(ASFLAGS) -d ELF_TYPE asm_io.asm
-
-first: driver.o first.o asm_io.o
-	$(CC) $(CFLAGS) -ofirst.out driver.o first.o asm_io.o
-
-first.o: asm_io.inc first.asm
-
-test: driver.o test.o asm_io.o
-	$(CC) $(CFLAGS) -otestmul.out driver.o test.o asm_io.o
-
-test.o: asm_io.inc test.asm
-
-prime: driver.o prime.o asm_io.o
-	$(CC) $(CFLAGS) -oprime.out driver.o prime.o asm_io.o
-
-prime.o: asm_io.inc prime.asm
-
+	$(AS) $(ASFLAGS) asm_io.asm
 
 
 clean :
