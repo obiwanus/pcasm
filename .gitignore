@@ -3,6 +3,7 @@
 *.lo
 *.o
 build/*.obj
+*.obj
 
 # Precompiled Headers
 *.gch
@@ -38,3 +39,4 @@ build/
 asm.config
 asm.files
 asm.includes
+*.pdb

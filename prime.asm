@@ -10,8 +10,13 @@ limit   resd    1
 guess   resd    1
 ; --------------------------------------------------------
 segment .text
+%ifdef ELF_TYPE
         global  asm_main
 asm_main:
+%else
+        global  _asm_main
+_asm_main:
+%endif
         enter   0,0               ; setup routine
         pusha
 

@@ -1,4 +1,10 @@
-#include "cdecl.h"
+#if defined(__GNUC__)
+#  define PRE_CDECL
+#  define POST_CDECL __attribute__((cdecl))
+#else
+#  define PRE_CDECL __cdecl
+#  define POST_CDECL
+#endif
 
 int PRE_CDECL asm_main( void ) POST_CDECL;
 
