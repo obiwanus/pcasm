@@ -23,17 +23,15 @@ _asm_main:
 
 ; END ----------------------------------------------------
 
-error:
-        mov eax, error_message
-        call print_string
-        call print_nl
-        jmp program_end
-
 program_end:
-
         popa
         mov eax, 0                      ; return back to C
         leave
         ret
 
+error:
+        mov eax, error_message
+        call print_string
+        call print_nl
+        jmp program_end
 

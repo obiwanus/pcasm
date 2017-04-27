@@ -1,17 +1,16 @@
 .SUFFIXES:
-.SUFFIXES: .o .asm .cpp .c .out
+.SUFFIXES: .out .o .asm .cpp .c
 
 AS=nasm
 ASFLAGS= -f elf -d ELF_TYPE
 CFLAGS= -m32
 CC=gcc
 
+%.out : %.o
+	$(CC) $(CFLAGS) -o $@ driver.c $< asm_io.o
 
 %.o : %.asm asm_io.o
 	$(AS) $(ASFLAGS) $<
-
-%.out : %.o
-	$(CC) $(CFLAGS) -o $@ driver.c $< asm_io.o
 
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
