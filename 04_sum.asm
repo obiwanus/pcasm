@@ -36,7 +36,7 @@ while_input:
         push ecx
         push input
         call get_int
-        sub esp, 8
+        add esp, 8
 
         cmp dword [input], 0
         je end_while_input
@@ -53,7 +53,7 @@ end_while_input:
 
         push dword [sum]
         call print_sum
-        sub esp, 4
+        add esp, 4
 
 ; END ----------------------------------------------------
 
