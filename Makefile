@@ -18,7 +18,6 @@ CC=gcc
 asm_io.o : asm_io.asm
 	$(AS) $(ASFLAGS) asm_io.asm
 
-
 clean :
 	rm *.o
 	rm *.out
