@@ -1,0 +1,87 @@
+.eqv	INT_MIN	0x80000000
+.eqv	NULL	0
+
+.data
+source:		.word	1, 6, 7, 4, 3, 6, 8, 2, 9, 12, -3, 4, 54, 35, 5, INT_MIN
+invalid_tree:	.asciiz	"The tree is invalid"
+
+.text
+		jal	new_node
+		
+program_end:	
+		li	$v0, 10
+		syscall
+	
+	
+#################################################################################
+# new_node: Create new tree node
+# $a0: node data to init
+# $a1: address of the parent node (may be NULL)
+# $v0: address of the allocated node
+.text
+new_node:	
+		move	$t0, $a0	# save node data into $t0
+		
+		li	$v0, 9		# sbrk
+		li	$a0, 16		# allocate space for 4 words
+		syscall			# $v0 will contain the address of the allocated memory
+		
+		sw	$t0, 0($v0)	# node->data = data
+		sw	$zero, 4($v0)	# node->left = NULL
+		sw	$zero, 8($v0)	# node->right = NULL
+		sw	$a1, 12($v0)	# node->parent = parent
+		
+		jr	$ra		# v0 will still contain the address we're supposed to return
+#################################################################################
+
+
+#################################################################################
+# insert
+# $a0: address of node
+# $a1: data to insert
+# returns nothing
+.text
+insert:	
+		sub	$sp, $sp, 16	# space for 4 vars on stack
+		sw	$ra, 0($sp)	# save return address
+		sw	$s0, 4($sp)	# save saved registers
+		sw	$s1, 8($sp)
+		sw	$s2, 12($sp)
+		
+		move	$s0, $a0	# s0 = address of node
+		move	$s1, $a1	# s1 = data
+		lw	$s2, 0($s0)	# s2 = node->data
+		
+		bgt	$s2, $s1, insert_left	# node->data > data ?
+		lw	$t0, 8($s0)	# t0 = node->right
+		bnez	$t0, insert_right_recurse
+		move	$a0, $s1	# a0 = data
+		move	$a1, $s0	# a1 = node 
+		jal	new_node	# v0 = new_node(data, node)
+		sw	$v0, 8($s0)	# node->right = v0
+		j	insert_end
+insert_right_recurse:
+		move	$a0, $t0	# a0 = node->right
+		move	$a1, $s1	# a1 = data
+		jal	insert		# insert(node->right, data)
+		j	insert_end
+insert_left:	
+		lw	$t0, 4($s0)	# t0 = node->left
+		bnez	$t0, insert_left_recurse
+		move	$a0, $s1	# a0 = data
+		move	$a1, $s0	# a1 = node 
+		jal	new_node	# v0 = new_node(data, node)		
+		sw	$v0, 4($s0)	# node->left = v0
+		j insert_end
+insert_left_recurse:
+		move	$a0, $t0	# a0 = node->left
+		move	$a1, $s1	# a1 = data
+		jal	insert		# insert(node->left, data)		
+insert_end:
+		lw	$s2, 12($sp)	# restore saved registers
+		lw	$s1, 8($sp)		
+		lw	$s0, 4($sp)
+		lw	$ra, 0($sp)	# restore return address
+		add	$sp, $sp, 16	# pop everything from stack frame		
+		jr	$ra		
+#################################################################################
