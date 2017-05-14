@@ -4,9 +4,10 @@
 .data
 source:		.word	1, 6, 7, 4, 3, 6, 8, 2, 9, 12, -3, 4, 54, 35, 5, INT_MIN
 invalid_tree:	.asciiz	"The tree is invalid"
+valid_tree:	.asciiz "The tree is valid"
 
 .text
-		jal	new_node
+		
 		
 program_end:	
 		li	$v0, 10
@@ -84,4 +85,31 @@ insert_end:
 		lw	$ra, 0($sp)	# restore return address
 		add	$sp, $sp, 16	# pop everything from stack frame		
 		jr	$ra		
+#################################################################################
+
+
+#################################################################################
+# check: Checks if tree is a valid BST
+# $a0: root node address
+# $v0: 1 if valid, 0 otherwise
+.text
+check:	
+	
+		
+		jr	$ra
+#################################################################################
+
+
+#################################################################################
+# build: Builds a BST given an array of integers terminated by INT_MIN
+# $a0: address of array
+# $v0: address of the root node of the new BST
+.text
+build:	
+		move	$a0, $zero
+		move	$a1, $zero
+		jal	new_node		
+		
+		
+		jr	$ra
 #################################################################################
