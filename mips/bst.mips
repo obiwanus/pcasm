@@ -16,11 +16,13 @@ valid_tree:	.asciiz "The tree is valid"
 		la	$a0, valid_tree
 		li	$v0, 4		# print string
 		syscall	
-		j	program_end
+		j	step2
 print_invalid:			
 		la	$a0, invalid_tree
 		li	$v0, 4		# print string
 		syscall
+		
+step2:		# TODO: use sort2list
 		
 program_end:	li	$v0, 10
 		syscall
@@ -185,5 +187,51 @@ build_endloop:	move	$v0, $s0		# return root node
 #################################################################################
 
 
+#################################################################################
+# sort2list: Flattens a BST into a sorted list
+# $a0: root node of the BST
+# $a1: address of the list to fill in
+# $v0: the number of items put into the list
+.text
+sort2list:		sub	$sp, $sp, 16
+		sw	$ra, 0($sp)
+		sw	$s0, 4($sp)
+		sw	$s1, 8($sp)
+		sw	$s2, 12($sp)
+		
+		move	$s0, $zero		# nodes_sorted = 0
+		move	$s1, $a2		# save pointer to list
+		move	$s2, $a0		# save pointer to root node
+
+		lw	$t0, 4($s2)		# t0 = node->left
+		beqz	$t0, sort2list_insert	# if (node->left != NULL)
+		move	$a0, $t0
+		move	$a1, $s1
+		jal	sort2list		# nodes_sorted = sort2list(node->left, o_list)
+		move	$s0, $v0
+		mul	$t0, $s0, 4		
+		add	$s1, $s1, $t0		# o_list += nodes_sorted
+		
+sort2list_insert:	lw	$t0, 0($s2)		# t0 = node->data
+		sw	$t0, 0($s1)		# *o_list = node->data
+		add	$s1, $s1, 4		# o_list++
+		add	$s0, $s0, 1		# nodes_sorted++
+		
+		lw	$t0, 8($s2)
+		beqz	$t0, sort2list_end	# if (node->right != NULL)
+		move	$a0, $t0
+		move	$a1, $s1
+		jal	sort2list		# v0 = sort2list(node->right, o_list)
+		add	$s0, $s0, $v0		# nodes_sorted += v0				
+		
+sort2list_end:	move	$v0, $s0		# return nodes_sorted
+
+		lw	$s2, 12($sp)
+		lw	$s1, 8($sp)
+		lw	$s0, 4($sp)
+		lw	$ra, 0($sp)
+		add	$sp, $sp, 16
+		jr	$ra
+#################################################################################
 
 
