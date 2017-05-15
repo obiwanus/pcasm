@@ -6,7 +6,21 @@ invalid_tree:	.asciiz	"The tree is invalid"
 valid_tree:	.asciiz "The tree is valid"
 
 .text
+
+		jal	build		# v0 = root node
 		
+		move 	$a0, $v0
+		jal	check		# v0 = is tree valid
+		
+		beqz	$v0, print_invalid
+		la	$a0, valid_tree
+		li	$v0, 4		# print string
+		syscall	
+		j	program_end
+print_invalid:			
+		la	$a0, invalid_tree
+		li	$v0, 4		# print string
+		syscall
 		
 program_end:	li	$v0, 10
 		syscall
@@ -87,7 +101,7 @@ insert_end:	lw	$s2, 12($sp)	# restore saved registers
 # $v0: 1 if valid, 0 otherwise
 .text
 check:	
-	
+		li	$v0, 1		# valid yay
 		
 		jr	$ra
 #################################################################################
@@ -100,9 +114,10 @@ check:
 .data
 source:		.word	1, 6, 7, 4, 3, 6, 8, 2, 9, 12, -3, 4, 54, 35, 5, INT_MIN
 .text
-build:		sub	$sp, $sp, 8
+build:		sub	$sp, $sp, 12
 		sw	$ra, 0($sp)
 		sw	$s0, 4($sp)
+		sw	$s1, 8($sp)
 		
 		lw	$a0, source		# a0 = first element of source
 		move	$a1, $zero
@@ -110,22 +125,23 @@ build:		sub	$sp, $sp, 8
 		
 		move	$s0, $v0		# s0 = address of root node
 			
-		li	$t0, 0			# i is t0
-build_loop:	add	$t0, $t0, 1		# i++
-		lw	$t1, source($t0)	# t1 = source[t0]
+		li	$s2, 0			# i is s2
+build_loop:	add	$s2, $s2, 4		# i++
+		lw	$t1, source($s2)	# t1 = source[s2]
 		beq	$t1, INT_MIN, build_endloop
 		
 		move	$a0, $s0
 		move	$a1, $t1
-		jal	insert			# insert(node, source[t0])
+		jal	insert			# insert(node, source[i])
 		
 		j	build_loop	
 		
 build_endloop:	move	$v0, $s0		# return root node
 		
+		lw	$s1, 8($sp)
 		lw	$s0, 4($sp)
 		lw	$ra, 0($sp)
-		add	$sp, $sp, 4		
+		add	$sp, $sp, 12
 		jr	$ra
 #################################################################################
 
