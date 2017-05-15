@@ -2,15 +2,13 @@
 .eqv	NULL	0
 
 .data
-source:		.word	1, 6, 7, 4, 3, 6, 8, 2, 9, 12, -3, 4, 54, 35, 5, INT_MIN
 invalid_tree:	.asciiz	"The tree is invalid"
 valid_tree:	.asciiz "The tree is valid"
 
 .text
 		
 		
-program_end:	
-		li	$v0, 10
+program_end:	li	$v0, 10
 		syscall
 	
 	
@@ -20,8 +18,7 @@ program_end:
 # $a1: address of the parent node (may be NULL)
 # $v0: address of the allocated node
 .text
-new_node:	
-		move	$t0, $a0	# save node data into $t0
+new_node:	move	$t0, $a0	# save node data into $t0
 		
 		li	$v0, 9		# sbrk
 		li	$a0, 16		# allocate space for 4 words
@@ -42,8 +39,7 @@ new_node:
 # $a1: data to insert
 # returns nothing
 .text
-insert:	
-		sub	$sp, $sp, 16	# space for 4 vars on stack
+insert:		sub	$sp, $sp, 16	# space for 4 vars on stack
 		sw	$ra, 0($sp)	# save return address
 		sw	$s0, 4($sp)	# save saved registers
 		sw	$s1, 8($sp)
@@ -55,31 +51,28 @@ insert:
 		
 		bgt	$s2, $s1, insert_left	# node->data > data ?
 		lw	$t0, 8($s0)	# t0 = node->right
-		bnez	$t0, insert_right_recurse
+		bnez	$t0, insert_right_rec
 		move	$a0, $s1	# a0 = data
 		move	$a1, $s0	# a1 = node 
 		jal	new_node	# v0 = new_node(data, node)
 		sw	$v0, 8($s0)	# node->right = v0
 		j	insert_end
-insert_right_recurse:
-		move	$a0, $t0	# a0 = node->right
+insert_right_rec:	move	$a0, $t0	# a0 = node->right
 		move	$a1, $s1	# a1 = data
 		jal	insert		# insert(node->right, data)
 		j	insert_end
-insert_left:	
-		lw	$t0, 4($s0)	# t0 = node->left
-		bnez	$t0, insert_left_recurse
+insert_left:	lw	$t0, 4($s0)	# t0 = node->left
+		bnez	$t0, insert_left_rec
 		move	$a0, $s1	# a0 = data
 		move	$a1, $s0	# a1 = node 
 		jal	new_node	# v0 = new_node(data, node)		
 		sw	$v0, 4($s0)	# node->left = v0
 		j insert_end
-insert_left_recurse:
-		move	$a0, $t0	# a0 = node->left
+insert_left_rec:	move	$a0, $t0	# a0 = node->left
 		move	$a1, $s1	# a1 = data
 		jal	insert		# insert(node->left, data)		
-insert_end:
-		lw	$s2, 12($sp)	# restore saved registers
+
+insert_end:	lw	$s2, 12($sp)	# restore saved registers
 		lw	$s1, 8($sp)		
 		lw	$s0, 4($sp)
 		lw	$ra, 0($sp)	# restore return address
@@ -104,12 +97,38 @@ check:
 # build: Builds a BST given an array of integers terminated by INT_MIN
 # $a0: address of array
 # $v0: address of the root node of the new BST
+.data
+source:		.word	1, 6, 7, 4, 3, 6, 8, 2, 9, 12, -3, 4, 54, 35, 5, INT_MIN
 .text
-build:	
-		move	$a0, $zero
+build:		sub	$sp, $sp, 8
+		sw	$ra, 0($sp)
+		sw	$s0, 4($sp)
+		
+		lw	$a0, source		# a0 = first element of source
 		move	$a1, $zero
-		jal	new_node		
+		jal	new_node		# v0 = new_node(source[0], NULL)
 		
+		move	$s0, $v0		# s0 = address of root node
+			
+		li	$t0, 0			# i is t0
+build_loop:	add	$t0, $t0, 1		# i++
+		lw	$t1, source($t0)	# t1 = source[t0]
+		beq	$t1, INT_MIN, build_endloop
 		
+		move	$a0, $s0
+		move	$a1, $t1
+		jal	insert			# insert(node, source[t0])
+		
+		j	build_loop	
+		
+build_endloop:	move	$v0, $s0		# return root node
+		
+		lw	$s0, 4($sp)
+		lw	$ra, 0($sp)
+		add	$sp, $sp, 4		
 		jr	$ra
 #################################################################################
+
+
+
+
