@@ -4,7 +4,10 @@
 .data
 invalid_tree:	.asciiz	"The tree is invalid\n"
 valid_tree:	.asciiz "The tree is valid\n"
-space:		.asciiz	" - "
+space:		.asciiz	" "
+newline:		.asciiz	"\n"
+min_is:		.asciiz	"The minimum is "
+max_is:		.asciiz	"The maximum is "
 
 .text
 
@@ -45,9 +48,46 @@ print_list:		lw	$a0, 0($s1)
 		add	$s1, $s1, 4	# o_list++
 		bne	$s2, $s3, print_list
 		
+		li	$v0, 4
+		la	$a0, newline
+		syscall	
+		
+		# Print minimum
+		
+		li	$v0, 4		# print string
+		la	$a0, min_is
+		syscall			# print ("the minimum is")
+		
+		move	$a0, $s0	
+		jal	min		# v0 = min(root)
+		move	$a0, $v0
+		li	$v0, 1		# print int
+		syscall
+
+		li	$v0, 4
+		la	$a0, newline
+		syscall	
+		
+		# Print maximum
+		
+		li	$v0, 4		# print string
+		la	$a0, max_is
+		syscall			# print ("the maximum is")
+		
+		move	$a0, $s0	
+		jal	max		# v0 = min(root)
+		move	$a0, $v0
+		li	$v0, 1		# print int
+		syscall
+
+		li	$v0, 4
+		la	$a0, newline
+		syscall		
+		
 		
 program_end:	li	$v0, 10
 		syscall
+		
 	
 	
 #################################################################################
@@ -257,3 +297,43 @@ sort2list_end:	move	$v0, $s0		# return nodes_sorted
 #################################################################################
 
 
+#################################################################################
+# min: finds the minimum value of a BST
+# $a0: root node
+# $v0: minimum value
+.text
+min:		sub	$sp, $sp, 4
+		sw	$ra, 0($sp)
+		
+		lw	$t0, 4($a0)		# t0 = node->left
+		bnez	$t0, min_rec
+		lw	$v0, 0($a0)		# return node->data
+		j	min_ret
+min_rec:		move	$a0, $t0
+		jal	min			# return min(node->left)		
+	
+min_ret:		lw	$ra, 0($sp)
+		add	$sp, $sp, 4
+		jr	$ra
+#################################################################################
+
+
+#################################################################################
+# max: finds the maximum value of a BST
+# $a0: root node
+# $v0: maximum value
+.text
+max:		sub	$sp, $sp, 4
+		sw	$ra, 0($sp)
+		
+		lw	$t0, 8($a0)		# t0 = node->right
+		bnez	$t0, max_rec
+		lw	$v0, 0($a0)		# return node->data
+		j	max_ret
+max_rec:		move	$a0, $t0
+		jal	max			# return max(node->right)		
+	
+max_ret:		lw	$ra, 0($sp)
+		add	$sp, $sp, 4
+		jr	$ra
+#################################################################################
