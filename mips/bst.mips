@@ -2,14 +2,17 @@
 .eqv	NULL	0
 
 .data
-invalid_tree:	.asciiz	"The tree is invalid"
-valid_tree:	.asciiz "The tree is valid"
+invalid_tree:	.asciiz	"The tree is invalid\n"
+valid_tree:	.asciiz "The tree is valid\n"
+space:		.asciiz	" - "
 
 .text
 
 		jal	build		# v0 = root node
 		
-		move 	$a0, $v0
+		move	$s0, $v0	# save root node
+		
+		move 	$a0, $s0
 		jal	check		# v0 = is tree valid
 		
 		beqz	$v0, print_invalid
@@ -17,19 +20,38 @@ valid_tree:	.asciiz "The tree is valid"
 		li	$v0, 4		# print string
 		syscall	
 		j	step2
-print_invalid:			
-		la	$a0, invalid_tree
+print_invalid:	la	$a0, invalid_tree
 		li	$v0, 4		# print string
 		syscall
 		
-step2:		# TODO: use sort2list
+step2:		li	$v0, 9		# sbrk
+		li	$a0, 400	# allocate space for 100 words
+		syscall			# v0 will contain the address of the allocated memory
+		move	$s1, $v0	# save reference
+		
+		move	$a0, $s0
+		move	$a1, $s1
+		jal	sort2list	# v0 = sort2list(root, o_list)
+		move	$s3, $v0	# s3 = nodes_sorted
+		
+		li	$s2, 0		# s2 is i
+print_list:		lw	$a0, 0($s1)
+		li	$v0, 1		# print integer
+		syscall
+		la	$a0, space
+		li	$v0, 4		# print string
+		syscall
+		add	$s2, $s2, 1	# i++
+		add	$s1, $s1, 4	# o_list++
+		bne	$s2, $s3, print_list
+		
 		
 program_end:	li	$v0, 10
 		syscall
 	
 	
 #################################################################################
-# new_node: Create new tree node
+# new_node: Create a new tree node
 # $a0: node data to init
 # $a1: address of the parent node (may be NULL)
 # $v0: address of the allocated node
@@ -200,7 +222,7 @@ sort2list:		sub	$sp, $sp, 16
 		sw	$s2, 12($sp)
 		
 		move	$s0, $zero		# nodes_sorted = 0
-		move	$s1, $a2		# save pointer to list
+		move	$s1, $a1		# save pointer to list
 		move	$s2, $a0		# save pointer to root node
 
 		lw	$t0, 4($s2)		# t0 = node->left
