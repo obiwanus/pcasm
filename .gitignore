@@ -40,3 +40,15 @@ asm.config
 asm.files
 asm.includes
 *.pdb
+
+# Modelsim
+*.bak
+*.mti
+*.mpf
+*.wlf
+_info
+*.qdb
+*.qpg
+*.qtl
+_vmake
+
