@@ -1,4 +1,7 @@
 module processor;
+
+parameter frequency = 20;
+
 reg [31:0] pc;
 reg clk;
 reg [7:0] datmem[0:31],mem[0:31];
@@ -70,13 +73,13 @@ initial begin
 end
 
 initial begin
-    pc=0;
+    pc = 0;
     #400 $finish;
 end
 
 initial begin
-    clk=0;
-    forever #20 clk = ~clk;
+    clk = 0;
+    forever #frequency clk = ~clk;
 end
 
 initial begin
