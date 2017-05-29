@@ -4,11 +4,9 @@ parameter frequency = 20;
 
 reg [31:0] pc;
 reg clk;
-reg [7:0] datmem[0:31],mem[0:31];
+reg [7:0] datmem[0:31],imem[0:31];
 wire [31:0] dataa,datab,out2,out3,out4,sum,extad,adder1out,adder2out,sextad,readdata;
-wire [5:0] inst31_26;
-wire [4:0] inst25_21,inst20_16,inst15_11,out1;
-wire [15:0] inst15_0;
+wire [4:0] out1;
 wire [31:0] instruc,dpack;
 wire [2:0] gout;
 wire cout,zout,nout,pcsrc,regdest,alusrc,memtoreg,regwrite,memread,memwrite,branch,aluop1,aluop0;
@@ -25,19 +23,13 @@ always @(posedge clk)
     end
 
 // instruction memory
-assign instruc = {mem[pc[4:0]], mem[pc[4:0]+1], mem[pc[4:0]+2], mem[pc[4:0]+3]};
-assign inst31_26 = instruc[31:26];
-assign inst25_21 = instruc[25:21];
-assign inst20_16 = instruc[20:16];
-assign inst15_11 = instruc[15:11];
-assign inst15_0 = instruc[15:0];
-
+assign instruc = {imem[pc[4:0]], imem[pc[4:0]+1], imem[pc[4:0]+2], imem[pc[4:0]+3]};
 
 // registers
-assign dataa = regfile[inst25_21];
-assign datab = regfile[inst20_16];
+assign dataa = regfile[instruc[25:21]];
+assign datab = regfile[instruc[20:16]];
 always @(posedge clk)
-    regfile[out1] = regwrite ? out3:regfile[out1];
+    regfile[out1] = regwrite ? out3 : regfile[out1];
 
 // multiplexers
 assign dpack = {datmem[sum[5:0]], datmem[sum[5:0]+1], datmem[sum[5:0]+2], datmem[sum[5:0]+3]};
@@ -64,11 +56,11 @@ assign pcsrc = branch && zout;
 // initialize datamemory,instruction memory and registers
 initial begin
     $readmemh("initdata.dat", datmem);
-    $readmemh("init.dat", mem);
+    $readmemh("init.dat", imem);
     $readmemh("initreg.dat", regfile);
 
 	for (i = 0; i < 31; i = i + 1)
-    	$display("Instruction Memory[%0d]= %h  ", i, mem[i], "Data Memory[%0d]= %h   ", i, datmem[i],
+    	$display("Instruction Memory[%0d]= %h  ", i, imem[i], "Data Memory[%0d]= %h   ", i, datmem[i],
     	"Register[%0d]= %h", i, regfile[i]);
 end
 

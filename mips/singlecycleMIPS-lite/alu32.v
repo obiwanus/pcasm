@@ -23,6 +23,6 @@ module alu32(sum,a,b,zout,gin);
 			3'b001: sum=a|b;
 			default: sum=31'bx;
 		endcase
-	zout=~(|sum);
+		zout=~(|sum);
 	end
 endmodule
