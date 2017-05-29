@@ -1,0 +1,13 @@
+
+- Write down the binary form of all instructions to implement
+- Reverse engineer the instructions already implemented
+- Follow the test program in the init file
+- Write test programs for each of those instructions
+- Sketch main implementation blocks
+- Implement as many as possible
+
+
+DONE
+- Draw the datapath diagram from the code
+- Check how registers and memory are initialised
+- Readmemh format

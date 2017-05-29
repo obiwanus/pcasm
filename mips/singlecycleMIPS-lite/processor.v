@@ -59,9 +59,9 @@ initial begin
     $readmemh("init.dat", imem);
     $readmemh("initreg.dat", regfile);
 
-	for (i = 0; i < 31; i = i + 1)
-    	$display("Instruction Memory[%0d]= %h  ", i, imem[i], "Data Memory[%0d]= %h   ", i, datmem[i],
-    	"Register[%0d]= %h", i, regfile[i]);
+    for (i = 0; i < 31; i = i + 1)
+        $display("Instruction Memory[%0d]= %h  ", i, imem[i], "Data Memory[%0d]= %h   ", i, datmem[i],
+        "Register[%0d]= %h", i, regfile[i]);
 end
 
 initial begin
