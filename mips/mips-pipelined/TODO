@@ -1,4 +1,5 @@
 
+- Reorganise the processor into something more understandable
 - Write down the binary form of all instructions to implement
 - Reverse engineer the instructions already implemented
 - Follow the test program in the init file
