@@ -2,15 +2,27 @@
 
 module processor;
     wire clk, reg_write;
+
+    // memory wires
     wire [4:0] addr_a, addr_b;
     wire [7:0] mem_addr, instr_addr;
     wire [31:0] data_a, data_b, reg_data_in;
     wire [31:0] instruction, mem_data;
 
+    // alu wires
+    wire [31:0] alu_out, alu_in1, alu_in2;
+    wire [2:0] alu_op;
+    wire alu_zout;
+
+    reg [31:0] pc;  // even though we use only first 8 bits
+
     clock_generator clk_gen(clk);
+
     register_file registers(data_a, data_b, addr_a, addr_b, reg_data_in, reg_write, clk);
     memory dmemory(mem_data, mem_addr, , , clk);
     rom imemory(instruction, instr_addr);
+
+    alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
 
     assign reg_write = 1;
     assign addr_a = 5'b0;
@@ -23,6 +35,30 @@ module processor;
         $readmemh("init_dmem.dat", dmemory.cells);
     end
 
+endmodule
+
+module alu(out, zout, a, b, op);
+    input [31:0] a, b;
+    input [2:0] op;
+    output reg [31:0] out;
+    output reg zout;
+
+    reg [31:0] diff;
+
+    always @(a or b or op) begin
+        case (op)
+            3'b000: out = a & b;
+            3'b001: out = a | b;
+            3'b010: out = a + b;
+            3'b110: out = a + 1 + (~b);  // subtract
+            3'b111: begin                // set less than
+                        diff = a + 1 + (~b);
+                        out = diff[31] ? 1 : 0;
+                    end
+            default: out = 32'bx;
+        endcase
+        zout = ~(|out);
+    end
 endmodule
 
 // A 32-bit register file containing 32 registers
@@ -39,7 +75,7 @@ module register_file(data_a, data_b, addr_a, addr_b, data_in, write, clk);
 
     initial registers[5'b0] = 32'b0;  // hard-wired zero register
 
-    always @(posedge clk) if (write) registers[addr_a] = data_in;
+    always @(posedge clk) if (write && addr_a) registers[addr_a] = data_in;
 endmodule
 
 module clock_generator(clk);
