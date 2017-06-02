@@ -1,9 +1,9 @@
 # Puts 0xFEFE in the first N bytes in memory
 
         # s0 = 0xFEFE
-        addi    $s0, $zero, 0xFE
+        addi    $s0, $zero, 0xFEFE
         sll     $s0, $s0, 16
-        addi    $s0, $s0, 0xFE
+        addi    $s0, $s0, 0xFEFE
 
         add     $t0, $zero, $zero       # t0 = 0
         addi    $s1, $zero, 64          # s1 is N = 64
