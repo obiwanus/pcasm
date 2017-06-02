@@ -37,6 +37,10 @@ module processor;
 
 endmodule
 
+// module alu_control();
+
+// endmodule
+
 module alu(out, zout, a, b, op);
     input [31:0] a, b;
     input [2:0] op;

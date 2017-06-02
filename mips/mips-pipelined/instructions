@@ -13,6 +13,8 @@ jr      8       rs              unconditional jump
 nor     0x27    rd, rs, rt
 or      0x25    rd, rs, rt
 slt     0x2a    rd, rs, rt      set rd to (rs < rt)
+sll     0       rd, rt, shamt   rd = rt << shamt
+srl     0x2     rd, rt, shamt   rd = rt >> shamt
 sub     0x22    rd, rs, rt      rd = rs - rt
 
 
@@ -40,6 +42,8 @@ sw      0x2B    rt, imm(rs)     store word in rt into memory at rs+imm
 
 
 # J-format
+
+instr   opcode  syntax          description
 
 baln    27      target26        if [z]=0, branch to target and link 31
 balz    26      target26        if [z]=1, branch to target and link 31
