@@ -90,6 +90,7 @@ static std::vector<std::string> g_symbol_table;
 struct Token {
   Token_Type type = Token__Unknown;
   int value = 0;
+  int line_num;
 };
 
 bool is_whitespace(char c) { return c == ' ' || c == '\t'; }
@@ -171,6 +172,7 @@ struct Tokenizer {
   Token read_token() {
     Token token = {};
     token.type = Token__Unknown;
+    token.line_num = line_num_;
 
     if (text_[at_] == '\n') {
       token.type = Token__Newline;
@@ -286,6 +288,8 @@ int main(int argc, const char *argv[]) {
   }
   Tokenizer tokenizer = Tokenizer(source);
   tokenizer.process_source();
+
+  // TODO: Generate code
 
   return 0;
 }
