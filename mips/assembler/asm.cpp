@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <vector>
+#include <string>
 
 #define COUNT_OF(x) \
   ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
@@ -70,7 +71,7 @@ enum Instruction {
 };
 
 // Note: has to be in the same order as the enum above
-const char *g_mnemonics[] = {
+static const char *g_mnemonics[] = {
     "unknown", "add",   "and",   "balrn", "balrz", "brn", "brz", "jalr",
     "jr",      "nor",   "or",    "slt",   "sll",   "srl", "sub", "addi",
     "andi",    "balmn", "balmz", "beq",   "beqal", "bmn", "bmz", "bne",
@@ -78,11 +79,13 @@ const char *g_mnemonics[] = {
     "baln",    "balz",  "bn",    "bz",    "jal",   "j",
 };
 
-const char *g_reg_names[] = {
+static const char *g_reg_names[] = {
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2",
     "t3",   "t4", "t5", "t6", "t7", "s0", "s1", "s2", "s3", "s4", "s5",
     "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
 };
+
+static std::vector<std::string> g_symbol_table;
 
 struct Token {
   Token_Type type = Token__Unknown;
@@ -117,9 +120,23 @@ int match_register(char *string) {
   return -1;
 }
 
+int match_identifier(std::string identifier) {
+  int index = 0;
+  for (auto &str : g_symbol_table) {
+    if (str == identifier) {
+      return index;
+    }
+    index++;
+  }
+  return -1;
+}
+
 int parse_int(char *string) {
-  assert(0);
-  return 0;
+  long value = strtol(string, NULL, 0);
+  if (value == 0 && strcmp(string, "0") != 0) {
+    printf("Warning: parsing %s as 0", string);
+  }
+  return (int)value;
 }
 
 struct Tokenizer {
@@ -137,7 +154,7 @@ struct Tokenizer {
 
   void process_source() {
     while (at_ < text_len_) {
-      this->eat_whitespace();
+      this->eat_whitespace_and_comments();
       Token token = this->read_token();
       if (token.type == Token__Unknown) {
         printf("Unknown token on line %d\n", line_num_);
@@ -155,10 +172,20 @@ struct Tokenizer {
     Token token = {};
     token.type = Token__Unknown;
 
+    if (text_[at_] == '\n') {
+      token.type = Token__Newline;
+      at_++;
+      return token;
+    } else if (text_[at_] == ',') {
+      token.type = Token__Comma;
+      at_++;
+      return token;
+    }
+
     // Read token into buffer
     int token_len = 0;
     char buffer[kMaxNameLen];
-    while (!is_whitespace(text_[at_]) && text_[at_] != ':') {
+    while (!is_whitespace(text_[at_]) && text_[at_] != '\n' && text_[at_] != ',') {
       buffer[token_len++] = text_[at_++];
     }
     buffer[token_len] = '\0';
@@ -177,8 +204,16 @@ struct Tokenizer {
         Instruction instruction = match_instruction(buffer);
         if (instruction == I__unknown) {
           token.type = Token__Identifier;
+          std::string identifier = buffer;
+          int table_number = match_identifier(identifier);
+          if (table_number == -1) {
+            g_symbol_table.push_back(identifier);
+            table_number = g_symbol_table.size();
+          }
+          token.value = table_number;
         } else {
           token.type = Token__Instruction;
+          token.value = (int)instruction;
         }
       }
     } else if (first_char == '$') {
@@ -201,12 +236,15 @@ struct Tokenizer {
     return token;
   }
 
-  void eat_whitespace() {
-    // TODO: eat comments
+  void eat_whitespace_and_comments() {
+    bool in_comment = false;
     while (at_ < text_len_) {
       char c = text_[at_];
-      if (is_whitespace(c)) {
+      if (is_whitespace(c) || (in_comment && c != '\n')) {
         at_++;
+      } else if (c == '#') {
+        at_++;
+        in_comment = true;
       } else {
         break;
       }
@@ -229,17 +267,23 @@ String read_file_into_string(const char *filename) {
 
   result.text = (char *)malloc(size * sizeof(char));
   fread(result.text, size, sizeof(char), file);
+  result.len = size;
 
   return result;
 }
 
 int main(int argc, const char *argv[]) {
-  if (argc < 2) {
-    printf("format: asm <file>\n");
-    return 0;
+  char *filename = (char *)"../mips-pipelined/programs/2_memset_subroutine.mips";
+  if (argc == 2) {
+    // printf("format: asm <file>\n");
+    // return 0;
+    filename = (char *)argv[1];
   }
-  const char *filename = argv[1];
   String source = read_file_into_string(filename);
+  if (source.len <= 0) {
+    printf("Can't open file %s.", filename);
+    return 1;
+  }
   Tokenizer tokenizer = Tokenizer(source);
   tokenizer.process_source();
 
