@@ -202,6 +202,16 @@ struct Tokenizer {
       char last_char = buffer[token_len - 1];
       if (last_char == ':') {
         token.type = Token__Label;
+        buffer[token_len - 1] = '\0';  // delete the colon
+        std::string label = buffer;
+        int label_num = match_identifier(label);
+        if (label_num == -1) {
+          g_symbol_table.push_back(label);
+          token.value = g_symbol_table.size();
+        } else {
+          printf("Redefinition of label %s on line %d\n", buffer, line_num_);
+          token.type = Token__Invalid;
+        }
       } else {
         Instruction instruction = match_instruction(buffer);
         if (instruction == I__unknown) {
