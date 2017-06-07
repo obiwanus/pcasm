@@ -25,6 +25,8 @@ enum Token_Type {
   Token__Comma,
   Token__Identifier,
   Token__Newline,
+  Token__OpenParen,
+  Token__CloseParen,
 };
 
 enum Instruction {
@@ -99,6 +101,10 @@ bool is_alpha(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
+bool is_token(char c) {
+  return c == '\n' || c == ',' || c == '(' || c == ')';
+}
+
 bool is_num(char c) { return ('0' <= c && c <= '9'); }
 
 Instruction match_instruction(char *string) {
@@ -132,6 +138,15 @@ int match_identifier(std::string identifier) {
   return -1;
 }
 
+int find_or_add_identifier(std::string identifier) {
+  int num = match_identifier(identifier);
+  if (num == -1) {
+    g_symbol_table.push_back(identifier);
+    num = g_symbol_table.size();
+  }
+  return num;
+}
+
 int parse_int(char *string) {
   long value = strtol(string, NULL, 0);
   if (value == 0 && strcmp(string, "0") != 0) {
@@ -139,6 +154,7 @@ int parse_int(char *string) {
   }
   return (int)value;
 }
+
 
 struct Tokenizer {
   int at_ = 0;
@@ -174,12 +190,20 @@ struct Tokenizer {
     token.type = Token__Unknown;
     token.line_num = line_num_;
 
-    if (text_[at_] == '\n') {
-      token.type = Token__Newline;
-      at_++;
-      return token;
-    } else if (text_[at_] == ',') {
-      token.type = Token__Comma;
+    if (is_token(text_[at_])) {
+      char c = text_[at_];
+      if (c == '\n') {
+        token.type = Token__Newline;
+      } else if (c == ',') {
+        token.type = Token__Comma;
+      } else if (c == '(') {
+        token.type = Token__OpenParen;
+      } else if (c == ')') {
+        token.type = Token__CloseParen;
+      } else {
+        printf("Token not listed here\n");
+        exit(1);
+      }
       at_++;
       return token;
     }
@@ -187,7 +211,7 @@ struct Tokenizer {
     // Read token into buffer
     int token_len = 0;
     char buffer[kMaxNameLen];
-    while (!is_whitespace(text_[at_]) && text_[at_] != '\n' && text_[at_] != ',') {
+    while (!is_whitespace(text_[at_]) && !is_token(text_[at_])) {
       buffer[token_len++] = text_[at_++];
     }
     buffer[token_len] = '\0';
@@ -204,25 +228,13 @@ struct Tokenizer {
         token.type = Token__Label;
         buffer[token_len - 1] = '\0';  // delete the colon
         std::string label = buffer;
-        int label_num = match_identifier(label);
-        if (label_num == -1) {
-          g_symbol_table.push_back(label);
-          token.value = g_symbol_table.size();
-        } else {
-          printf("Redefinition of label %s on line %d\n", buffer, line_num_);
-          token.type = Token__Invalid;
-        }
+        token.value = find_or_add_identifier(label);
       } else {
         Instruction instruction = match_instruction(buffer);
         if (instruction == I__unknown) {
           token.type = Token__Identifier;
           std::string identifier = buffer;
-          int table_number = match_identifier(identifier);
-          if (table_number == -1) {
-            g_symbol_table.push_back(identifier);
-            table_number = g_symbol_table.size();
-          }
-          token.value = table_number;
+          token.value = find_or_add_identifier(identifier);
         } else {
           token.type = Token__Instruction;
           token.value = (int)instruction;
