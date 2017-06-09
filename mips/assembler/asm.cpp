@@ -29,7 +29,7 @@ enum Token_Type {
   Token__CloseParen,
 };
 
-enum Instruction {
+enum Instruction_Type {
   I__unknown = 0,
   I__add,
   I__and,
@@ -72,6 +72,16 @@ enum Instruction {
   I__COUNT,
 };
 
+struct Instruction {
+  Instruction_Type type;
+  short rs;  // register numbers
+  short rt;
+  short rd;
+  short shamt;  // shift amount
+  int16_t imm16;  // address/immediate
+  int addr26_w;  // 26-bit word address (=> 28-bit byte address)
+};
+
 // Note: has to be in the same order as the enum above
 static const char *g_mnemonics[] = {
     "unknown", "add",   "and",   "balrn", "balrz", "brn", "brz", "jalr",
@@ -107,12 +117,12 @@ bool is_token(char c) {
 
 bool is_num(char c) { return ('0' <= c && c <= '9'); }
 
-Instruction match_instruction(char *string) {
+Instruction_Type match_instruction(char *string) {
   if (strlen(string) > 5) return I__unknown;
   // Linear search, but it's OK
   for (int i = 1; i < COUNT_OF(g_mnemonics); ++i) {
     if (strcmp(g_mnemonics[i], string) == 0) {
-      return (Instruction)i;
+      return (Instruction_Type)i;
     }
   }
   return I__unknown;
@@ -230,7 +240,7 @@ struct Tokenizer {
         std::string label = buffer;
         token.value = find_or_add_identifier(label);
       } else {
-        Instruction instruction = match_instruction(buffer);
+        Instruction_Type instruction = match_instruction(buffer);
         if (instruction == I__unknown) {
           token.type = Token__Identifier;
           std::string identifier = buffer;
@@ -311,7 +321,9 @@ int main(int argc, const char *argv[]) {
   Tokenizer tokenizer = Tokenizer(source);
   tokenizer.process_source();
 
-  // TODO: Generate code
+  std::vector<Instruction> instructions;
+  instructions.reserve(100);
+
 
   return 0;
 }
