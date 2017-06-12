@@ -29,6 +29,12 @@ enum Token_Type {
   Token__CloseParen,
 };
 
+// Must match above
+const char *g_token_types[] = {
+    "Unknown", "Invalid",    "Label",   "Instruction", "Register",   "Number",
+    "Comma",   "Identifier", "Newline", "OpenParen",   "CloseParen",
+};
+
 enum Instruction_Type {
   I__unknown = 0,
   I__add,
@@ -45,6 +51,9 @@ enum Instruction_Type {
   I__sll,
   I__srl,
   I__sub,
+
+  I__RFORMAT,
+
   I__addi,
   I__andi,
   I__balmn,
@@ -62,6 +71,9 @@ enum Instruction_Type {
   I__lw,
   I__ori,
   I__sw,
+
+  I__IFORMAT,
+
   I__baln,
   I__balz,
   I__bn,
@@ -77,18 +89,18 @@ struct Instruction {
   short rs;  // register numbers
   short rt;
   short rd;
-  short shamt;  // shift amount
+  short shamt;    // shift amount
   int16_t imm16;  // address/immediate
-  int addr26_w;  // 26-bit word address (=> 28-bit byte address)
+  int addr26_w;   // 26-bit word address (=> 28-bit byte address)
 };
 
 // Note: has to be in the same order as the enum above
 static const char *g_mnemonics[] = {
-    "unknown", "add",   "and",   "balrn", "balrz", "brn", "brz", "jalr",
-    "jr",      "nor",   "or",    "slt",   "sll",   "srl", "sub", "addi",
-    "andi",    "balmn", "balmz", "beq",   "beqal", "bmn", "bmz", "bne",
-    "bneal",   "jalm",  "jalpc", "jm",    "jpc",   "lw",  "ori", "sw",
-    "baln",    "balz",  "bn",    "bz",    "jal",   "j",
+    "unknown", "add",   "and",   "balrn", "balrz", "brn",   "brz", "jalr",
+    "jr",      "nor",   "or",    "slt",   "sll",   "srl",   "sub", NULL,
+    "addi",    "andi",  "balmn", "balmz", "beq",   "beqal", "bmn", "bmz",
+    "bne",     "bneal", "jalm",  "jalpc", "jm",    "jpc",   "lw",  "ori",
+    "sw",      NULL,    "baln",  "balz",  "bn",    "bz",    "jal", "j",
 };
 
 static const char *g_reg_names[] = {
@@ -103,6 +115,8 @@ struct Token {
   Token_Type type = Token__Unknown;
   int value = 0;
   int line_num;
+
+  const char *repr() { return g_token_types[(int)type]; }
 };
 
 bool is_whitespace(char c) { return c == ' ' || c == '\t'; }
@@ -111,9 +125,7 @@ bool is_alpha(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
-bool is_token(char c) {
-  return c == '\n' || c == ',' || c == '(' || c == ')';
-}
+bool is_token(char c) { return c == '\n' || c == ',' || c == '(' || c == ')'; }
 
 bool is_num(char c) { return ('0' <= c && c <= '9'); }
 
@@ -121,7 +133,7 @@ Instruction_Type match_instruction(char *string) {
   if (strlen(string) > 5) return I__unknown;
   // Linear search, but it's OK
   for (int i = 1; i < COUNT_OF(g_mnemonics); ++i) {
-    if (strcmp(g_mnemonics[i], string) == 0) {
+    if (g_mnemonics[i] != NULL && strcmp(g_mnemonics[i], string) == 0) {
       return (Instruction_Type)i;
     }
   }
@@ -164,7 +176,6 @@ int parse_int(char *string) {
   }
   return (int)value;
 }
-
 
 struct Tokenizer {
   int at_ = 0;
@@ -286,6 +297,156 @@ struct Tokenizer {
   }
 };
 
+struct CodeGenerator {
+  int at_ = 0;
+  std::vector<Instruction> instructions_;
+  std::vector<Token> tokens_;
+
+  CodeGenerator(std::vector<Token> tokens) {
+    instructions_.reserve(100);
+    tokens_ = tokens;  // copy but it's ok
+  }
+
+  Token get_token() { return tokens_[at_]; }
+
+  bool tokens_left() { return at_ < tokens_.size(); }
+
+  void advance_token() { at_++; }
+
+  int line_num() { return this->get_token().line_num; }
+
+  void check_label() {
+    Token token = this->get_token();
+    if (token.type == Token__Label) {
+      // TODO: Register label
+      this->advance_token();
+    }
+  }
+
+  void eat_newlines() {
+    Token token = this->get_token();
+    while (token.type == Token__Newline) {
+      this->advance_token();
+      token = this->get_token();
+    }
+  }
+
+  Instruction_Type expect_instruction() {
+    Token token = this->get_token();
+    if (token.type != Token__Instruction) {
+      printf("Expected instruction on line %d, got %s\n", this->line_num(),
+             token.repr());
+      exit(1);
+    }
+    this->advance_token();
+  }
+
+  Instruction read_instruction() {
+    Instruction i = {};
+    i.type = this->expect_instruction();
+
+    // struct Instruction {
+    //   Instruction_Type type;
+    //   short rs;  // register numbers
+    //   short rt;
+    //   short rd;
+    //   short shamt;  // shift amount
+    //   int16_t imm16;  // address/immediate
+    //   int addr26_w;  // 26-bit word address (=> 28-bit byte address)
+    // };
+
+    switch (i.type) {
+      // ===== R-format
+
+      case I__add:
+      case I__and:
+      case I__nor:
+      case I__or:
+      case I__slt:
+      case I__sub: {
+        // rd, rs, rt
+      } break;
+
+      case I__balrn:
+      case I__balrz:
+      case I__jalr: {
+        // rs, rd
+      } break;
+
+      case I__brn:
+      case I__brz:
+      case I__jr: {
+        // rs
+      } break;
+
+      case I__sll:
+      case I__srl: {
+        // rd, rt, shamt
+      } break;
+
+      // ===== I-format
+
+      case I__addi:
+      case I__andi:
+      case I__ori: {
+        // rt, rs, imm
+      } break;
+
+      case I__balmn:
+      case I__balmz:
+      case I__jalm:
+      case I__lw:
+      case I__sw: {
+        // rt, imm(rs)
+      } break;
+
+      case I__beq:
+      case I__beqal:
+      case I__bne:
+      case I__bneal: {
+        // rs, rt, offset
+      } break;
+
+      case I__bmn:
+      case I__bmz:
+      case I__jm: {
+        // imm(rs)
+      } break;
+
+      case I__jalpc: {
+        // rt, offset
+      } break;
+
+      case I__jpc: {
+        // offset
+      } break;
+
+      // ===== J-format
+
+      case I__baln:
+      case I__balz:
+      case I__bn:
+      case I__bz:
+      case I__jal:
+      case I__j: {
+        // target26
+      } break;
+
+      default: {
+        printf("Unknown instruction on line %d", this->line_num());
+      } break;
+    }
+  }
+
+  void read_instructions() {
+    while (this->tokens_left()) {
+      this->eat_newlines();
+      this->check_label();
+      Instruction instruction = this->read_instruction();
+    }
+  }
+};
+
 String read_file_into_string(const char *filename) {
   String result = {};
   FILE *file = fopen(filename, "r");
@@ -307,7 +468,8 @@ String read_file_into_string(const char *filename) {
 }
 
 int main(int argc, const char *argv[]) {
-  char *filename = (char *)"../mips-pipelined/programs/2_memset_subroutine.mips";
+  char *filename =
+      (char *)"../mips-pipelined/programs/2_memset_subroutine.mips";
   if (argc == 2) {
     // printf("format: asm <file>\n");
     // return 0;
@@ -321,9 +483,8 @@ int main(int argc, const char *argv[]) {
   Tokenizer tokenizer = Tokenizer(source);
   tokenizer.process_source();
 
-  std::vector<Instruction> instructions;
-  instructions.reserve(100);
-
+  CodeGenerator code = CodeGenerator(tokenizer.tokens_);
+  code.read_instructions();
 
   return 0;
 }
