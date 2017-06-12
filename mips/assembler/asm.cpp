@@ -84,14 +84,24 @@ enum Instruction_Type {
   I__COUNT,
 };
 
+struct Identifier {
+  bool resolved = false;
+  int index = -1;
+  int value;
+
+  int resolve() {
+    return 0;
+  }
+};
+
 struct Instruction {
   Instruction_Type type;
   short rs;  // register numbers
   short rt;
   short rd;
   short shamt;    // shift amount
-  int16_t imm16;  // address/immediate
-  int addr26_w;   // 26-bit word address (=> 28-bit byte address)
+  int16_t imm16;  // immediate
+  Identifier address;  // 16 bit offset or 26 bit address
 };
 
 // Note: has to be in the same order as the enum above
@@ -307,11 +317,10 @@ struct CodeGenerator {
     tokens_ = tokens;  // copy but it's ok
   }
 
-  Token get_token() { return tokens_[at_]; }
-
-  bool tokens_left() { return at_ < tokens_.size(); }
-
   void advance_token() { at_++; }
+  Token get_token() { return tokens_[at_]; }
+  Token get_token_and_advance() { return tokens_[at_++]; }
+  bool tokens_left() { return at_ < tokens_.size(); }
 
   int line_num() { return this->get_token().line_num; }
 
@@ -365,23 +374,37 @@ struct CodeGenerator {
       case I__slt:
       case I__sub: {
         // rd, rs, rt
+        i.rd = this->expect_register();
+        this->expect_comma();
+        i.rs = this->expect_register();
+        this->expect_comma();
+        i.rt = this->expect_register();
       } break;
 
       case I__balrn:
       case I__balrz:
       case I__jalr: {
         // rs, rd
+        i.rs = this->expect_register();
+        this->expect_comma();
+        i.rd = this->expect_register();
       } break;
 
       case I__brn:
       case I__brz:
       case I__jr: {
         // rs
+        i.rs = this->expect_register();
       } break;
 
       case I__sll:
       case I__srl: {
         // rd, rt, shamt
+        i.rd = this->expect_register();
+        this->expect_comma();
+        i.rt = this->expect_register();
+        this->expect_comma();
+        i.shamt = this->expect_number();
       } break;
 
       // ===== I-format
@@ -390,6 +413,11 @@ struct CodeGenerator {
       case I__andi:
       case I__ori: {
         // rt, rs, imm
+        i.rt = this->expect_register();
+        this->expect_comma();
+        i.rs = this->expect_register();
+        this->expect_comma();
+        i.imm16 = this->expect_immediate();
       } break;
 
       case I__balmn:
@@ -398,6 +426,12 @@ struct CodeGenerator {
       case I__lw:
       case I__sw: {
         // rt, imm(rs)
+        i.rt = this->expect_register();
+        this->expect_comma();
+        i.imm16 = this->expect_immediate();
+        this->expect_open_paren();
+        i.rs = this->expect_register();
+        this->expect_close_paren();
       } break;
 
       case I__beq:
@@ -405,20 +439,33 @@ struct CodeGenerator {
       case I__bne:
       case I__bneal: {
         // rs, rt, offset
+        i.rs = this->expect_register();
+        this->expect_comma();
+        i.rt = this->expect_register();
+        this->expect_comma();
+        i.address = this->expect_identifier();
       } break;
 
       case I__bmn:
       case I__bmz:
       case I__jm: {
         // imm(rs)
+        i.imm16 = this->expect_immediate();
+        this->expect_open_paren();
+        i.rs = this->expect_register();
+        this->expect_close_paren();
       } break;
 
       case I__jalpc: {
         // rt, offset
+        i.rt = this->expect_register();
+        this->expect_comma();
+        i.address = this->expect_identifier();
       } break;
 
       case I__jpc: {
         // offset
+        i.address = this->expect_identifier();
       } break;
 
       // ===== J-format
@@ -430,13 +477,54 @@ struct CodeGenerator {
       case I__jal:
       case I__j: {
         // target26
+        i.address = this->expect_identifier();
       } break;
 
       default: {
         printf("Unknown instruction on line %d", this->line_num());
       } break;
     }
+
+    if (this->tokens_left()) {
+      this->expect_newline();  // every instruction should be on new line
+    }
   }
+
+  short expect_register() {
+    Token token = this->expect_token(Token__Register);
+    return (short)token.value;
+  }
+
+  short expect_number() {
+    Token token = this->expect_token(Token__Number);
+    return (short)token.value;
+  }
+
+  int16_t expect_immediate() {
+    return (int16_t)this->expect_number();
+  }
+
+  Identifier expect_identifier() {
+    Token token = this->expect_token(Token__Identifier);
+    // TODO: expect labels too!
+    return token.value;
+  }
+
+  Token expect_token(Token_Type type) {
+    Token token = this->get_token_and_advance();
+    if (token.type != type) {
+      const char *expected = g_token_types[(int)type];
+      printf("Expected %s, got %s on line %d", expected, token.repr(),
+             this->line_num());
+      exit(1);
+    }
+    return token;
+  }
+
+  void expect_newline() { this->expect_token(Token__Newline); }
+  void expect_comma() { this->expect_token(Token__Comma); }
+  void expect_open_paren() { this->expect_token(Token__OpenParen); }
+  void expect_close_paren() { this->expect_token(Token__CloseParen); }
 
   void read_instructions() {
     while (this->tokens_left()) {
