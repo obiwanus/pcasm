@@ -32,8 +32,8 @@ enum Token_Type {
 
 // Must match above
 const char *g_token_types[] = {
-    "Unknown", "Invalid",    "Label",   "Instruction", "Register",   "Number",
-    "Comma",   "Identifier", "Newline", "OpenParen",   "CloseParen",
+    "unknown", "invalid",    "label",   "instruction", "register",   "number",
+    "comma",   "identifier", "newline", "openparen",   "closeparen",
 };
 
 enum Instruction_Type {
@@ -92,9 +92,7 @@ struct Identifier {
 
   Identifier(int index = -1) { index_ = index; }
 
-  int resolved_value() {
-    return value_;
-  }
+  int resolved_value() { return value_; }
 };
 
 struct Instruction {
@@ -110,17 +108,11 @@ struct Instruction {
   short opcode;
   short func;
 
-  bool is_R_type() {
-    return type < I__RFORMAT;
-  }
+  bool is_R_type() { return type < I__RFORMAT; }
 
-  bool is_I_type() {
-    return I__RFORMAT < type && type < I__IFORMAT;
-  }
+  bool is_I_type() { return I__RFORMAT < type && type < I__IFORMAT; }
 
-  bool is_J_type() {
-    return I__IFORMAT < type;
-  }
+  bool is_J_type() { return I__IFORMAT < type; }
 
   void set_opcode_and_func() {
     // clang-format off
@@ -186,7 +178,13 @@ static const char *g_reg_names[] = {
     "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
 };
 
-static std::vector<std::string> g_symbol_table;
+struct Symbol_Table_Entry {
+  std::string str;
+  bool resolved = false;
+  int value = 0;
+};
+
+static std::vector<Symbol_Table_Entry> g_symbol_table;
 
 struct Token {
   Token_Type type = Token__Unknown;
@@ -229,7 +227,7 @@ int match_register(char *string) {
 int match_identifier(std::string identifier) {
   int index = 0;
   for (auto &str : g_symbol_table) {
-    if (str == identifier) {
+    if (str.str == identifier) {
       return index;
     }
     index++;
@@ -239,8 +237,10 @@ int match_identifier(std::string identifier) {
 
 int find_or_add_identifier(std::string identifier) {
   int num = match_identifier(identifier);
+  Symbol_Table_Entry entry;
+  entry.str = identifier;
   if (num == -1) {
-    g_symbol_table.push_back(identifier);
+    g_symbol_table.push_back(entry);
     num = g_symbol_table.size();
   }
   return num;
@@ -390,14 +390,15 @@ struct CodeGenerator {
     instruction += std::bitset<6>(i.opcode).to_string() + SPACE;
 
     if (i.is_R_type()) {
-      instruction +=
-          std::bitset<5>(i.rs).to_string() + SPACE + std::bitset<5>(i.rt).to_string() + SPACE +
-          std::bitset<5>(i.rd).to_string() + SPACE + std::bitset<5>(i.shamt).to_string() + SPACE +
-          std::bitset<6>(i.func).to_string();
+      instruction += std::bitset<5>(i.rs).to_string() + SPACE +
+                     std::bitset<5>(i.rt).to_string() + SPACE +
+                     std::bitset<5>(i.rd).to_string() + SPACE +
+                     std::bitset<5>(i.shamt).to_string() + SPACE +
+                     std::bitset<6>(i.func).to_string();
     } else if (i.is_I_type()) {
-      instruction +=
-          std::bitset<5>(i.rs).to_string() + SPACE + std::bitset<5>(i.rt).to_string() + SPACE +
-          std::bitset<16>(i.imm16).to_string();
+      instruction += std::bitset<5>(i.rs).to_string() + SPACE +
+                     std::bitset<5>(i.rt).to_string() + SPACE +
+                     std::bitset<16>(i.imm16).to_string();
     } else if (i.is_J_type()) {
       instruction += std::bitset<26>(i.address.resolved_value()).to_string();
     } else {
@@ -433,7 +434,25 @@ struct CodeGenerator {
     this->eat_newlines();
     Token token = this->get_token();
     if (token.type == Token__Label) {
-      // TODO: Register label
+      //
+
+
+
+      // TODO: register labels
+      // - easily done by counting instructions
+      // - how do we deal with offsets?
+
+
+
+
+
+
+
+
+
+
+
+      //
       this->advance_token();
     }
     this->eat_newlines();
@@ -603,8 +622,8 @@ struct CodeGenerator {
     Token token = this->get_token_and_advance();
     if (token.type != type) {
       const char *expected = g_token_types[(int)type];
-      printf("Expected %s, got %s on line %d\n", expected, token.repr(),
-             token.line_num);
+      printf("Syntax error on line %d: Expected %s, got %s\n",
+             token.line_num, expected, token.repr());
       exit(1);
     }
     return token;
