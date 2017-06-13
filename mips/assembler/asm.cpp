@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <vector>
 #include <string>
+#include <bitset>
 
 #define COUNT_OF(x) \
   ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
@@ -89,13 +90,9 @@ struct Identifier {
   int index_ = -1;
   int value_;
 
-  Identifier(int index = -1) {
-    index_ = index;
-  }
+  Identifier(int index = -1) { index_ = index; }
 
-  int resolve() {
-    return 0;
-  }
+  int resolve() { return 0; }
 };
 
 struct Instruction {
@@ -103,9 +100,61 @@ struct Instruction {
   short rs;  // register numbers
   short rt;
   short rd;
-  short shamt;    // shift amount
-  int16_t imm16;  // immediate
+  short shamt;         // shift amount
+  int16_t imm16;       // immediate
   Identifier address;  // 16 bit offset or 26 bit address
+
+  // Calculated fields
+  short opcode;
+  short func;
+
+  void set_opcode_and_func() {
+    // clang-format off
+    switch (this->type) {
+      case I__add: { opcode = 0; func = 0x20; break; }
+      case I__and: { opcode = 0; func = 0x24; break; }
+      case I__balrn: { opcode = 0; func = 23; break; }
+      case I__balrz: { opcode = 0; func = 22; break; }
+      case I__brn: { opcode = 0; func = 21; break; }
+      case I__brz: { opcode = 0; func = 20; break; }
+      case I__jalr: { opcode = 0; func = 9; break; }
+      case I__jr: { opcode = 0; func = 8; break; }
+      case I__nor: { opcode = 0; func = 0x27; break; }
+      case I__or: { opcode = 0; func = 0x25; break; }
+      case I__slt: { opcode = 0; func = 0x2a; break; }
+      case I__sll: { opcode = 0; func = 0; break; }
+      case I__srl: { opcode = 0; func = 0x2; break; }
+      case I__sub: { opcode = 0; func = 0x22; break; }
+      case I__addi: { opcode = 0x8; func = 0; break; }
+      case I__andi: { opcode = 0xC; func = 0; break; }
+      case I__balmn: { opcode = 23; func = 0; break; }
+      case I__balmz: { opcode = 22; func = 0; break; }
+      case I__beq: { opcode = 0x4; func = 0; break; }
+      case I__beqal: { opcode = 44; func = 0; break; }
+      case I__bmn: { opcode = 21; func = 0; break; }
+      case I__bmz: { opcode = 20; func = 0; break; }
+      case I__bne: { opcode = 0x5; func = 0; break; }
+      case I__bneal: { opcode = 45; func = 0; break; }
+      case I__jalm: { opcode = 19; func = 0; break; }
+      case I__jalpc: { opcode = 31; func = 0; break; }
+      case I__jm: { opcode = 18; func = 0; break; }
+      case I__jpc: { opcode = 30; func = 0; break; }
+      case I__lw: { opcode = 0x23; func = 0; break; }
+      case I__ori: { opcode = 0xD; func = 0; break; }
+      case I__sw: { opcode = 0x2B; func = 0; break; }
+      case I__baln: { opcode = 27; func = 0; break; }
+      case I__balz: { opcode = 26; func = 0; break; }
+      case I__bn: { opcode = 25; func = 0; break; }
+      case I__bz: { opcode = 24; func = 0; break; }
+      case I__jal: { opcode = 0x3; func = 0; break; }
+      case I__j: { opcode = 0x2; func = 0; break; }
+      default: {
+        printf("ERROR: Unknown instruction type: %d", (int)this->type);
+        exit(1);
+      }
+    };
+    // clang-format on
+  }
 };
 
 // Note: has to be in the same order as the enum above
@@ -317,6 +366,37 @@ struct CodeGenerator {
     tokens_ = tokens;  // copy but it's ok
   }
 
+  int encode_instruction(Instruction i, char *at) {
+    const int kLen = 33;
+    std::string instruction;
+    instruction.reserve(kLen);
+    i.set_opcode_and_func();  // not nice I know
+    instruction =
+        std::bitset<6>(i.opcode).to_string() +
+        std::bitset<5>(i.rs).to_string() + std::bitset<5>(i.rt).to_string() +
+        std::bitset<5>(i.rd).to_string() + std::bitset<5>(i.shamt).to_string() +
+        std::bitset<6>(i.func).to_string();
+    sprintf(at, "%s\n", instruction.c_str());
+    return strlen(at);
+  }
+
+  String generate() {
+    this->read_instructions();  // transform tokens into instructions
+
+    // Allocate memory for result
+    String result = {};
+    result.len = (32 + 10) * instructions_.size();
+    result.text = (char *)malloc(result.len * sizeof(char));
+
+    char *at = result.text;
+    for (auto instruction : instructions_) {
+      int chars_written = this->encode_instruction(instruction, at);
+      at += chars_written;
+    }
+
+    return result;
+  }
+
   void advance_token() { at_++; }
   Token get_token() { return tokens_[at_]; }
   Token get_token_and_advance() { return tokens_[at_++]; }
@@ -460,9 +540,7 @@ struct CodeGenerator {
         i.address = this->expect_identifier();
       } break;
 
-      default: {
-        printf("Unknown instruction (code %d)", (int)i.type);
-      } break;
+      default: { printf("Unknown instruction (code %d)", (int)i.type); } break;
     }
 
     if (this->tokens_left()) {
@@ -482,9 +560,7 @@ struct CodeGenerator {
     return (short)token.value;
   }
 
-  int16_t expect_immediate() {
-    return (int16_t)this->expect_number();
-  }
+  int16_t expect_immediate() { return (int16_t) this->expect_number(); }
 
   Identifier expect_identifier() {
     Token token = this->expect_token(Token__Identifier);
@@ -559,7 +635,8 @@ int main(int argc, const char *argv[]) {
   tokenizer.process_source();
 
   CodeGenerator code = CodeGenerator(tokenizer.tokens_);
-  code.read_instructions();
+  String generated_code = code.generate();
+  printf("%s", generated_code.text);
 
   return 0;
 }
