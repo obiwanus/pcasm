@@ -85,9 +85,13 @@ enum Instruction_Type {
 };
 
 struct Identifier {
-  bool resolved = false;
-  int index = -1;
-  int value;
+  bool resolved_ = false;
+  int index_ = -1;
+  int value_;
+
+  Identifier(int index = -1) {
+    index_ = index;
+  }
 
   int resolve() {
     return 0;
@@ -142,7 +146,7 @@ bool is_num(char c) { return ('0' <= c && c <= '9'); }
 Instruction_Type match_instruction(char *string) {
   if (strlen(string) > 5) return I__unknown;
   // Linear search, but it's OK
-  for (int i = 1; i < COUNT_OF(g_mnemonics); ++i) {
+  for (size_t i = 1; i < COUNT_OF(g_mnemonics); ++i) {
     if (g_mnemonics[i] != NULL && strcmp(g_mnemonics[i], string) == 0) {
       return (Instruction_Type)i;
     }
@@ -151,7 +155,7 @@ Instruction_Type match_instruction(char *string) {
 }
 
 int match_register(char *string) {
-  for (int i = 0; i < COUNT_OF(g_reg_names); ++i) {
+  for (size_t i = 0; i < COUNT_OF(g_reg_names); ++i) {
     if (strcmp(g_reg_names[i], string) == 0) {
       return i;
     }
@@ -308,7 +312,7 @@ struct Tokenizer {
 };
 
 struct CodeGenerator {
-  int at_ = 0;
+  size_t at_ = 0;
   std::vector<Instruction> instructions_;
   std::vector<Token> tokens_;
 
@@ -348,6 +352,7 @@ struct CodeGenerator {
       exit(1);
     }
     this->advance_token();
+    return (Instruction_Type)token.value;
   }
 
   Instruction read_instruction() {
@@ -488,6 +493,8 @@ struct CodeGenerator {
     if (this->tokens_left()) {
       this->expect_newline();  // every instruction should be on new line
     }
+
+    return i;
   }
 
   short expect_register() {
@@ -506,8 +513,7 @@ struct CodeGenerator {
 
   Identifier expect_identifier() {
     Token token = this->expect_token(Token__Identifier);
-    // TODO: expect labels too!
-    return token.value;
+    return Identifier(token.value);
   }
 
   Token expect_token(Token_Type type) {
@@ -531,6 +537,7 @@ struct CodeGenerator {
       this->eat_newlines();
       this->check_label();
       Instruction instruction = this->read_instruction();
+      instructions_.push_back(instruction);
     }
   }
 };
