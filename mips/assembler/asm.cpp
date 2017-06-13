@@ -1,15 +1,16 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <vector>
-#include <string>
 #include <bitset>
+#include <string>
+#include <vector>
 
 #define COUNT_OF(x) \
   ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
 
 static const int kMaxNameLen = 100;
+static const int kInstrLenInBytes = 4;
 
 struct String {
   char *text;
@@ -32,8 +33,8 @@ enum Token_Type {
 
 // Must match above
 const char *g_token_types[] = {
-    "Unknown", "Invalid",    "Label",   "Instruction", "Register",   "Number",
-    "Comma",   "Identifier", "Newline", "OpenParen",   "CloseParen",
+    "unknown", "invalid",    "label",   "instruction", "register",   "number",
+    "comma",   "identifier", "newline", "openparen",   "closeparen",
 };
 
 enum Instruction_Type {
@@ -85,15 +86,54 @@ enum Instruction_Type {
   I__COUNT,
 };
 
+// Note: has to be in the same order as the enum above
+static const char *g_mnemonics[] = {
+    "unknown", "add",   "and",   "balrn", "balrz", "brn",   "brz", "jalr",
+    "jr",      "nor",   "or",    "slt",   "sll",   "srl",   "sub", NULL,
+    "addi",    "andi",  "balmn", "balmz", "beq",   "beqal", "bmn", "bmz",
+    "bne",     "bneal", "jalm",  "jalpc", "jm",    "jpc",   "lw",  "ori",
+    "sw",      NULL,    "baln",  "balz",  "bn",    "bz",    "jal", "j",
+};
+
+static const char *g_reg_names[] = {
+    "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2",
+    "t3",   "t4", "t5", "t6", "t7", "s0", "s1", "s2", "s3", "s4", "s5",
+    "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
+};
+
+struct Symbol_Table_Entry {
+  std::string str;
+  bool resolved = false;
+  int value = 0;
+};
+
+static std::vector<Symbol_Table_Entry> g_symbol_table;
+
 struct Identifier {
   bool resolved_ = false;
   int index_ = -1;
-  int value_ = -1;
+  int instr_address_ = 0;  // memory address of the instruction it's used in
 
-  Identifier(int index = -1) { index_ = index; }
+  Identifier() {}
 
-  int resolved_value() {
-    return value_;
+  Identifier(int index, int instr_num) {
+    index_ = index;
+    instr_address_ = instr_num * kInstrLenInBytes;
+  }
+
+  int resolved_value(bool offset = false) { 
+    assert(index_ >= 0);
+    Symbol_Table_Entry entry = g_symbol_table[index_];
+    if (!entry.resolved) {
+      printf("Unknown identifier %s\n", entry.str.c_str());
+      exit(1);
+    }
+    if (offset) {
+      // Calculate offset from the instruction using it to the label
+      return ???????;
+    }
+
+    return value_; 
   }
 };
 
@@ -110,17 +150,11 @@ struct Instruction {
   short opcode;
   short func;
 
-  bool is_R_type() {
-    return type < I__RFORMAT;
-  }
+  bool is_R_type() { return type < I__RFORMAT; }
 
-  bool is_I_type() {
-    return I__RFORMAT < type && type < I__IFORMAT;
-  }
+  bool is_I_type() { return I__RFORMAT < type && type < I__IFORMAT; }
 
-  bool is_J_type() {
-    return I__IFORMAT < type;
-  }
+  bool is_J_type() { return I__IFORMAT < type; }
 
   void set_opcode_and_func() {
     // clang-format off
@@ -171,23 +205,6 @@ struct Instruction {
   }
 };
 
-// Note: has to be in the same order as the enum above
-static const char *g_mnemonics[] = {
-    "unknown", "add",   "and",   "balrn", "balrz", "brn",   "brz", "jalr",
-    "jr",      "nor",   "or",    "slt",   "sll",   "srl",   "sub", NULL,
-    "addi",    "andi",  "balmn", "balmz", "beq",   "beqal", "bmn", "bmz",
-    "bne",     "bneal", "jalm",  "jalpc", "jm",    "jpc",   "lw",  "ori",
-    "sw",      NULL,    "baln",  "balz",  "bn",    "bz",    "jal", "j",
-};
-
-static const char *g_reg_names[] = {
-    "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2",
-    "t3",   "t4", "t5", "t6", "t7", "s0", "s1", "s2", "s3", "s4", "s5",
-    "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
-};
-
-static std::vector<std::string> g_symbol_table;
-
 struct Token {
   Token_Type type = Token__Unknown;
   int value = 0;
@@ -229,7 +246,7 @@ int match_register(char *string) {
 int match_identifier(std::string identifier) {
   int index = 0;
   for (auto &str : g_symbol_table) {
-    if (str == identifier) {
+    if (str.str == identifier) {
       return index;
     }
     index++;
@@ -239,8 +256,10 @@ int match_identifier(std::string identifier) {
 
 int find_or_add_identifier(std::string identifier) {
   int num = match_identifier(identifier);
+  Symbol_Table_Entry entry;
+  entry.str = identifier;
   if (num == -1) {
-    g_symbol_table.push_back(identifier);
+    g_symbol_table.push_back(entry);
     num = g_symbol_table.size();
   }
   return num;
@@ -390,14 +409,15 @@ struct CodeGenerator {
     instruction += std::bitset<6>(i.opcode).to_string() + SPACE;
 
     if (i.is_R_type()) {
-      instruction +=
-          std::bitset<5>(i.rs).to_string() + SPACE + std::bitset<5>(i.rt).to_string() + SPACE +
-          std::bitset<5>(i.rd).to_string() + SPACE + std::bitset<5>(i.shamt).to_string() + SPACE +
-          std::bitset<6>(i.func).to_string();
+      instruction += std::bitset<5>(i.rs).to_string() + SPACE +
+                     std::bitset<5>(i.rt).to_string() + SPACE +
+                     std::bitset<5>(i.rd).to_string() + SPACE +
+                     std::bitset<5>(i.shamt).to_string() + SPACE +
+                     std::bitset<6>(i.func).to_string();
     } else if (i.is_I_type()) {
-      instruction +=
-          std::bitset<5>(i.rs).to_string() + SPACE + std::bitset<5>(i.rt).to_string() + SPACE +
-          std::bitset<16>(i.imm16).to_string();
+      instruction += std::bitset<5>(i.rs).to_string() + SPACE +
+                     std::bitset<5>(i.rt).to_string() + SPACE +
+                     std::bitset<16>(i.imm16).to_string();
     } else if (i.is_J_type()) {
       instruction += std::bitset<26>(i.address.resolved_value()).to_string();
     } else {
@@ -433,7 +453,10 @@ struct CodeGenerator {
     this->eat_newlines();
     Token token = this->get_token();
     if (token.type == Token__Label) {
-      // TODO: Register label
+      // TODO: register labels
+      // - easily done by counting instructions
+      // - how do we deal with offsets?
+
       this->advance_token();
     }
     this->eat_newlines();
@@ -591,7 +614,7 @@ struct CodeGenerator {
 
   Identifier expect_identifier() {
     Token token = this->expect_token(Token__Identifier);
-    return Identifier(token.value);
+    return Identifier(token.value, instructions_.size());
   }
 
   Instruction_Type expect_instruction() {
@@ -603,8 +626,8 @@ struct CodeGenerator {
     Token token = this->get_token_and_advance();
     if (token.type != type) {
       const char *expected = g_token_types[(int)type];
-      printf("Expected %s, got %s on line %d\n", expected, token.repr(),
-             token.line_num);
+      printf("Syntax error on line %d: Expected %s, got %s\n", token.line_num,
+             expected, token.repr());
       exit(1);
     }
     return token;
