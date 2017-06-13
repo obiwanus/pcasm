@@ -229,6 +229,7 @@ struct Tokenizer {
       char c = text_[at_];
       if (c == '\n') {
         token.type = Token__Newline;
+        line_num_++;
       } else if (c == ',') {
         token.type = Token__Comma;
       } else if (c == '(') {
@@ -282,11 +283,6 @@ struct Tokenizer {
         token.type = Token__Unknown;
       }
       token.value = reg_number;
-    } else if (first_char == ',') {
-      token.type = Token__Comma;
-    } else if (first_char == '\n') {
-      token.type = Token__Newline;
-      line_num_++;
     } else if (is_num(first_char) || (first_char == '-' && is_num(buffer[1]))) {
       token.type = Token__Number;
       token.value = parse_int(buffer);
@@ -326,14 +322,14 @@ struct CodeGenerator {
   Token get_token_and_advance() { return tokens_[at_++]; }
   bool tokens_left() { return at_ < tokens_.size(); }
 
-  int line_num() { return this->get_token().line_num; }
-
   void check_label() {
+    this->eat_newlines();
     Token token = this->get_token();
     if (token.type == Token__Label) {
       // TODO: Register label
       this->advance_token();
     }
+    this->eat_newlines();
   }
 
   void eat_newlines() {
@@ -344,30 +340,9 @@ struct CodeGenerator {
     }
   }
 
-  Instruction_Type expect_instruction() {
-    Token token = this->get_token();
-    if (token.type != Token__Instruction) {
-      printf("Expected instruction on line %d, got %s\n", this->line_num(),
-             token.repr());
-      exit(1);
-    }
-    this->advance_token();
-    return (Instruction_Type)token.value;
-  }
-
   Instruction read_instruction() {
     Instruction i = {};
     i.type = this->expect_instruction();
-
-    // struct Instruction {
-    //   Instruction_Type type;
-    //   short rs;  // register numbers
-    //   short rt;
-    //   short rd;
-    //   short shamt;  // shift amount
-    //   int16_t imm16;  // address/immediate
-    //   int addr26_w;  // 26-bit word address (=> 28-bit byte address)
-    // };
 
     switch (i.type) {
       // ===== R-format
@@ -486,7 +461,7 @@ struct CodeGenerator {
       } break;
 
       default: {
-        printf("Unknown instruction on line %d", this->line_num());
+        printf("Unknown instruction (code %d)", (int)i.type);
       } break;
     }
 
@@ -516,12 +491,17 @@ struct CodeGenerator {
     return Identifier(token.value);
   }
 
+  Instruction_Type expect_instruction() {
+    Token token = this->expect_token(Token__Instruction);
+    return (Instruction_Type)token.value;
+  }
+
   Token expect_token(Token_Type type) {
     Token token = this->get_token_and_advance();
     if (token.type != type) {
       const char *expected = g_token_types[(int)type];
-      printf("Expected %s, got %s on line %d", expected, token.repr(),
-             this->line_num());
+      printf("Expected %s, got %s on line %d\n", expected, token.repr(),
+             token.line_num);
       exit(1);
     }
     return token;
@@ -534,8 +514,8 @@ struct CodeGenerator {
 
   void read_instructions() {
     while (this->tokens_left()) {
-      this->eat_newlines();
       this->check_label();
+      if (!this->tokens_left()) break;
       Instruction instruction = this->read_instruction();
       instructions_.push_back(instruction);
     }

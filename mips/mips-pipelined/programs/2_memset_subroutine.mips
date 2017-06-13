@@ -11,7 +11,7 @@
             addi    $a2, $zero, 8      # 2 words
             jal     memset
 
-            addi    $a0, $zero, $v0
+            add     $a0, $zero, $v0
             addi    $a1, $zero, 0xffff
             sll     $a1, $a1, 16
             addi    $a1, $zero, 0xffff
