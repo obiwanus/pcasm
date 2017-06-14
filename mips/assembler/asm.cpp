@@ -121,7 +121,15 @@ struct Identifier {
     instr_address_ = instr_num * kInstrLenInBytes;
   }
 
-  int resolved_value(bool offset = false) {
+  int as_offset() {
+    return this->resolved_value(true);
+  }
+
+  int as_address() {
+    return this->resolved_value(false);
+  }
+
+  int resolved_value(bool offset) {
     assert(index_ >= 0);
     Symbol_Table_Entry entry = g_symbol_table[index_];
     if (!entry.resolved) {
@@ -150,10 +158,13 @@ struct Instruction {
   short func;
 
   bool is_R_type() { return type < I__RFORMAT; }
-
   bool is_I_type() { return I__RFORMAT < type && type < I__IFORMAT; }
-
   bool is_J_type() { return I__IFORMAT < type; }
+
+  bool contains_offset() {
+    return type == I__beq || type == I__beqal || type == I__bne ||
+           type == I__bneal || type == I__jalpc || type == I__jpc;
+  }
 
   void set_opcode_and_func() {
     // clang-format off
@@ -400,7 +411,7 @@ struct CodeGenerator {
 
   int encode_instruction(Instruction i, char *at) {
     const int kLen = 40;
-    const std::string SPACE = "";
+    const std::string SPACE = " ";
     std::string instruction;
     instruction.reserve(kLen);
     i.set_opcode_and_func();  // not nice I know
@@ -414,11 +425,16 @@ struct CodeGenerator {
                      std::bitset<5>(i.shamt).to_string() + SPACE +
                      std::bitset<6>(i.func).to_string();
     } else if (i.is_I_type()) {
+      std::string immediate;
+      if (i.contains_offset()) {
+        immediate = std::bitset<16>(i.address.as_offset()).to_string();
+      } else {
+        immediate = std::bitset<16>(i.imm16).to_string();
+      }
       instruction += std::bitset<5>(i.rs).to_string() + SPACE +
-                     std::bitset<5>(i.rt).to_string() + SPACE +
-                     std::bitset<16>(i.imm16).to_string();
+                     std::bitset<5>(i.rt).to_string() + SPACE + immediate;
     } else if (i.is_J_type()) {
-      instruction += std::bitset<26>(i.address.resolved_value()).to_string();
+      instruction += std::bitset<26>(i.address.as_address()).to_string();
     } else {
       assert(!"Invalid code path");
     }
@@ -455,7 +471,8 @@ struct CodeGenerator {
       // Register label
       Symbol_Table_Entry &entry = g_symbol_table[token.value];
       if (entry.resolved) {
-        printf("Redefinition of label '%s' on line %d", entry.str.c_str(), token.line_num);
+        printf("Redefinition of label '%s' on line %d", entry.str.c_str(),
+               token.line_num);
         exit(1);
       }
       entry.value = instructions_.size() * kInstrLenInBytes;
@@ -630,8 +647,8 @@ struct CodeGenerator {
     Token token = this->get_token_and_advance();
     if (token.type != type) {
       const char *expected = g_token_types[(int)type];
-      printf("Syntax error on line %d: Expected %s, got %s\n",
-             token.line_num, expected, token.repr());
+      printf("Syntax error on line %d: Expected %s, got %s\n", token.line_num,
+             expected, token.repr());
       exit(1);
     }
     return token;
