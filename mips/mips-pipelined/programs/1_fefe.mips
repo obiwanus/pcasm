@@ -1,14 +1,14 @@
-# Puts 0xFEFE in the first N bytes in memory
+# Puts 0xFEFE in the first 64 bytes in memory
 
         # s0 = 0xFEFE
-        addi    $s0, $zero, 0xFEFE
-        sll     $s0, $s0, 16
-        addi    $s0, $s0, 0xFEFE
+        addi    $s0, $zero, 0xFEFE      # 001000 00000 10000 1111111011111110
+        sll     $s0, $s0, 16            # 000000 00000 10000 10000 10000 000000
+        addi    $s0, $s0, 0xFEFE        # 001000 10000 10000 1111111011111110
 
-        add     $t0, $zero, $zero       # t0 = 0
-        addi    $s1, $zero, 64          # s1 is N = 64
+        add     $t0, $zero, $zero       # 000000 00000 00000 01000 00000 100000
+        addi    $s1, $zero, 64          # 001000 00000 10001 0000000001000000
 
-loop:   sw      $s0, 0($t0)
-        addi    $t0, $t0, 4
-        slt     $t1, $t0, $s1
-        bne     $t1, $zero, loop
+loop:   sw      $s0, 0($t0)             # 101011 01000 10000 0000000000000000
+        addi    $t0, $t0, 4             # 001000 01000 01000 0000000000000100
+        slt     $t1, $t0, $s1           # 000000 01000 10001 01001 00000 101010
+        bne     $t1, $zero, loop        # 000101 01001 00000 1111111111110100
