@@ -453,9 +453,13 @@ struct CodeGenerator {
     this->eat_newlines();
     Token token = this->get_token();
     if (token.type == Token__Label) {
+
+
       // TODO: register labels
       // - easily done by counting instructions
       // - how do we deal with offsets?
+
+
 
       this->advance_token();
     }
@@ -626,8 +630,8 @@ struct CodeGenerator {
     Token token = this->get_token_and_advance();
     if (token.type != type) {
       const char *expected = g_token_types[(int)type];
-      printf("Syntax error on line %d: Expected %s, got %s\n", token.line_num,
-             expected, token.repr());
+      printf("Syntax error on line %d: Expected %s, got %s\n",
+             token.line_num, expected, token.repr());
       exit(1);
     }
     return token;
