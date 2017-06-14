@@ -121,7 +121,7 @@ struct Identifier {
     instr_address_ = instr_num * kInstrLenInBytes;
   }
 
-  int resolved_value(bool offset = false) { 
+  int resolved_value(bool offset = false) {
     assert(index_ >= 0);
     Symbol_Table_Entry entry = g_symbol_table[index_];
     if (!entry.resolved) {
@@ -130,10 +130,9 @@ struct Identifier {
     }
     if (offset) {
       // Calculate offset from the instruction using it to the label
-      return ???????;
+      return entry.value - instr_address_;
     }
-
-    return value_; 
+    return entry.value;
   }
 };
 
@@ -259,8 +258,8 @@ int find_or_add_identifier(std::string identifier) {
   Symbol_Table_Entry entry;
   entry.str = identifier;
   if (num == -1) {
-    g_symbol_table.push_back(entry);
     num = g_symbol_table.size();
+    g_symbol_table.push_back(entry);
   }
   return num;
 }
@@ -401,7 +400,7 @@ struct CodeGenerator {
 
   int encode_instruction(Instruction i, char *at) {
     const int kLen = 40;
-    const std::string SPACE = " ";
+    const std::string SPACE = "";
     std::string instruction;
     instruction.reserve(kLen);
     i.set_opcode_and_func();  // not nice I know
@@ -453,13 +452,14 @@ struct CodeGenerator {
     this->eat_newlines();
     Token token = this->get_token();
     if (token.type == Token__Label) {
-
-
-      // TODO: register labels
-      // - easily done by counting instructions
-      // - how do we deal with offsets?
-
-
+      // Register label
+      Symbol_Table_Entry &entry = g_symbol_table[token.value];
+      if (entry.resolved) {
+        printf("Redefinition of label '%s' on line %d", entry.str.c_str(), token.line_num);
+        exit(1);
+      }
+      entry.value = instructions_.size() * kInstrLenInBytes;
+      entry.resolved = true;
 
       this->advance_token();
     }
