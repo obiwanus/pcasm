@@ -24,22 +24,30 @@ module processor;
 
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
 
-    assign reg_write = 1;
-    assign addr_a = 5'b0;
-    assign reg_data_in = 32'b111000;
-    assign addr_b = 5'h2;
+    assign alu_in1 = data_a;    // first input on alu is always from register
 
     initial begin
         $readmemh("init_reg.dat", registers.registers);
-        $readmemh("init_imem.dat", imemory.storage.cells);
+        $readmemb("init_imem.dat", imemory.storage.cells);
         $readmemh("init_dmem.dat", dmemory.cells);
     end
 
 endmodule
 
-// module alu_control();
+module instruction_decoder(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
+    input [31:0] instruction;
+    output [5:0] opcode, func;
+    output [4:0] rs, rt, rd, shamt;
+    output [15:0] imm16;
+    output [25:0] addr26;
 
-// endmodule
+    assign opcode = instruction[31:26];
+    assign rs = instruction[25:21];
+    assign rt = instruction[20:16];
+    assign rd = instruction[15:11];
+    assign shamt = instruction[10:6];
+    assign func = instruction[5:0];
+endmodule
 
 module alu(out, zout, a, b, op);
     input [31:0] a, b;
@@ -83,7 +91,7 @@ module register_file(data_a, data_b, addr_a, addr_b, data_in, write, clk);
 endmodule
 
 module clock_generator(clk);
-    parameter frequency = 20;
+    parameter frequency = 10;
     output reg clk;
 
     initial clk = 0;
@@ -93,7 +101,7 @@ module clock_generator(clk);
     end
 endmodule
 
-// An 8-bit word addressable memory (256 x 32bit cells)
+// Memory (256 x 32bit cells) address is 8 bits, word is 32 bits
 module memory(data_out, addr, data_in, write, clk);
     input write, clk;
     input [7:0] addr;
