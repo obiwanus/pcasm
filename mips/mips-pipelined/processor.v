@@ -50,6 +50,11 @@ module processor;
 
 endmodule
 
+module control();
+    // TODO: implement control signals
+endmodule
+
+
 module instruction_splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
     input [31:0] instruction;
     output [5:0] opcode, func;
