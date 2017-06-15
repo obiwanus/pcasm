@@ -4,7 +4,7 @@ module processor;
     wire clk, reg_write;
 
     // memory wires
-    wire [4:0] addr_a, addr_b;
+    wire [4:0] addr_a, addr_b, addr_in;
     wire [7:0] mem_addr, instr_addr;
     wire [31:0] data_a, data_b, reg_data_in;
     wire [31:0] instruction, mem_data;
@@ -14,7 +14,8 @@ module processor;
     wire [2:0] alu_op;
     wire alu_zout;
 
-    reg [31:0] pc, pc_new;  // even though we use only first 8 bits
+    reg [31:0] pc;  // even though we use only first 8 bits
+    wire [31:0] pc_new;
 
     // instruction wires grouped into useful groups
     wire [5:0] opcode, func;
@@ -22,17 +23,20 @@ module processor;
     wire [15:0] imm16;
     wire [25:0] addr26;
 
-    assign alu_in1 = data_a;    // first input on alu is always from register
-    assign instr_addr = pc[7:0];
-
     // modules
     clock_generator clk_gen(clk);
-    register_file registers(data_a, data_b, addr_a, addr_b, reg_data_in, reg_write, clk);
-    memory dmemory(mem_data, mem_addr, , , clk);
+    register_file registers(data_a, data_b, addr_a, addr_b, addr_in, reg_data_in, reg_write, clk);
+    memory dmemory(mem_data, mem_addr, , , clk);  // TODO: add missing wires
     rom imemory(instruction, instr_addr);
     instruction_splitter splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
+    add4 pc_incrementer(pc_new, pc);
 
+    // assignments
+    assign alu_in1 = data_a;    // first input on alu is always from register
+    assign instr_addr = pc[7:0];
+
+    // procedural blocks
     initial begin
         $readmemh("init_reg.dat", registers.registers);
         $readmemb("init_imem.dat", imemory.storage.cells);
@@ -97,9 +101,9 @@ module add4(out, in);
 endmodule
 
 // A 32-bit register file containing 32 registers
-module register_file(data_a, data_b, addr_a, addr_b, data_in, write, clk);
+module register_file(data_a, data_b, addr_a, addr_b, addr_in, data_in, write, clk);
     input write, clk;
-    input [4:0] addr_a, addr_b;
+    input [4:0] addr_a, addr_b, addr_in;
     input [31:0] data_in;
     output [31:0] data_a, data_b;
 
@@ -110,7 +114,7 @@ module register_file(data_a, data_b, addr_a, addr_b, data_in, write, clk);
 
     initial registers[5'b0] = 32'b0;  // hard-wired zero register
 
-    always @(posedge clk) if (write && addr_a) registers[addr_a] = data_in;
+    always @(posedge clk) if (write && addr_a) registers[addr_in] = data_in;
 endmodule
 
 module clock_generator(clk);
