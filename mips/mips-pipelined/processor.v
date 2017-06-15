@@ -14,39 +14,55 @@ module processor;
     wire [2:0] alu_op;
     wire alu_zout;
 
-    reg [31:0] pc;  // even though we use only first 8 bits
+    reg [31:0] pc, pc_new;  // even though we use only first 8 bits
 
+    // instruction wires grouped into useful groups
+    wire [5:0] opcode, func;
+    wire [4:0] rs, rt, rd, shamt;
+    wire [15:0] imm16;
+    wire [25:0] addr26;
+
+    assign alu_in1 = data_a;    // first input on alu is always from register
+    assign instr_addr = pc[7:0];
+
+    // modules
     clock_generator clk_gen(clk);
-
     register_file registers(data_a, data_b, addr_a, addr_b, reg_data_in, reg_write, clk);
     memory dmemory(mem_data, mem_addr, , , clk);
     rom imemory(instruction, instr_addr);
-
+    instruction_splitter splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
-
-    assign alu_in1 = data_a;    // first input on alu is always from register
 
     initial begin
         $readmemh("init_reg.dat", registers.registers);
         $readmemb("init_imem.dat", imemory.storage.cells);
         $readmemh("init_dmem.dat", dmemory.cells);
+        pc = 0;
+    end
+
+    always @(negedge clk) begin
+        pc = pc_new;
     end
 
 endmodule
 
-module instruction_decoder(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
+module instruction_splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
     input [31:0] instruction;
     output [5:0] opcode, func;
     output [4:0] rs, rt, rd, shamt;
     output [15:0] imm16;
     output [25:0] addr26;
 
+    // split instruction into wires
     assign opcode = instruction[31:26];
     assign rs = instruction[25:21];
     assign rt = instruction[20:16];
     assign rd = instruction[15:11];
     assign shamt = instruction[10:6];
     assign func = instruction[5:0];
+    assign imm16 = instruction[15:0];
+    assign addr26 = instruction[25:0];
+
 endmodule
 
 module alu(out, zout, a, b, op);
@@ -71,6 +87,13 @@ module alu(out, zout, a, b, op);
         endcase
         zout = ~(|out);
     end
+endmodule
+
+module add4(out, in);
+    output [31:0] out;
+    input [31:0] in;
+
+    assign out = in + 4;
 endmodule
 
 // A 32-bit register file containing 32 registers
