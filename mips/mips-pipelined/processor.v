@@ -5,7 +5,7 @@ module processor;
 
     // memory wires
     wire [4:0] addr_a, addr_b, addr_in;
-    wire [7:0] mem_addr, instr_addr;
+    wire [7:0] mem_addr;
     wire [31:0] data_a, data_b, reg_data_in;
     wire [31:0] instruction, mem_data;
 
@@ -14,33 +14,48 @@ module processor;
     wire [2:0] alu_op;
     wire alu_zout;
 
-    reg [31:0] pc;  // even though we use only first 8 bits
-    wire [31:0] pc_new;
-
-    // instruction wires grouped into useful groups
-    wire [5:0] opcode, func;
-    wire [4:0] rs, rt, rd, shamt;
+    wire [4:0] shamt;
     wire [15:0] imm16;
     wire [25:0] addr26;
+
+    // control wires
+    wire is_jump;
 
     // modules
     clock_generator clk_gen(clk);
     register_file registers(data_a, data_b, addr_a, addr_b, addr_in, reg_data_in, reg_write, clk);
     memory dmemory(mem_data, mem_addr, , , clk);  // TODO: add missing wires
-    rom imemory(instruction, instr_addr);
-    instruction_splitter splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
+    control ctrl(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
-    add4 pc_incrementer(pc_new, pc);
+    instruction_fetch IFU(instruction, pc, imm16, addr26, is_jump, is_branch, clk);
 
     // assignments
     assign alu_in1 = data_a;    // first input on alu is always from register
-    assign instr_addr = pc[7:0];
 
     // procedural blocks
     initial begin
         $readmemh("init_reg.dat", registers.registers);
-        $readmemb("init_imem.dat", imemory.storage.cells);
         $readmemh("init_dmem.dat", dmemory.cells);
+    end
+
+endmodule
+
+module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
+    // Note: see CS-224 lecture 24 7:00
+    output [31:0] instruction;
+    input [15:0] imm16;
+    input [25:0] addr26;
+    input is_branch, is_jump;
+    input clk;
+
+    reg [29:0] pc;  // even though we use only first 8 bits
+    wire [29:0] pc_new;
+    wire [7:0] instr_addr;
+
+    rom imemory(instruction, instr_addr);
+
+    initial begin
+        $readmemb("init_imem.dat", imemory.storage.cells);
         pc = 0;
     end
 
@@ -50,17 +65,15 @@ module processor;
 
 endmodule
 
-module control();
-    // TODO: implement control signals
-endmodule
-
-
-module instruction_splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16, addr26);
+module control(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, instruction);
     input [31:0] instruction;
-    output [5:0] opcode, func;
-    output [4:0] rs, rt, rd, shamt;
+    output [4:0] addr_a, addr_b, addr_in, shamt;
     output [15:0] imm16;
     output [25:0] addr26;
+    output is_jump;
+
+    wire [5:0] opcode, func;
+    wire [4:0] rs, rt, rd;
 
     // split instruction into wires
     assign opcode = instruction[31:26];
@@ -71,6 +84,8 @@ module instruction_splitter(instruction, opcode, rs, rt, rd, shamt, func, imm16,
     assign func = instruction[5:0];
     assign imm16 = instruction[15:0];
     assign addr26 = instruction[25:0];
+
+
 
 endmodule
 
@@ -98,6 +113,7 @@ module alu(out, zout, a, b, op);
     end
 endmodule
 
+// TODO: this should probably be add 1!
 module add4(out, in);
     output [31:0] out;
     input [31:0] in;
