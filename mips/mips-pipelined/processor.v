@@ -48,11 +48,15 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
     input is_branch, is_jump;
     input clk;
 
-    reg [29:0] pc;  // even though we use only first 8 bits
-    wire [29:0] pc_new;
+    reg [29:0] pc;  // even though our addresses are 8 bits (and 6 bits for instructions)
+    wire [29:0] pc_new, pc_seq, jump_addr;
     wire [7:0] instr_addr;
 
     rom imemory(instruction, instr_addr);
+    mux2_30 jmux(pc_new, jump_addr, pc_seq, is_jump);
+
+    assign jump_addr = {pc[29:26], addr26};
+    assign pc_seq = pc + 1;
 
     initial begin
         $readmemb("init_imem.dat", imemory.storage.cells);
@@ -63,6 +67,14 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
         pc = pc_new;
     end
 
+endmodule
+
+module mux2_30(out, a, b, select);
+    output [29:0] out;
+    input [29:0] a, b;
+    input select;
+
+    assign out = select ? a : b;
 endmodule
 
 module control(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, instruction);
