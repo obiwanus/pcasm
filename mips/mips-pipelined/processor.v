@@ -27,7 +27,7 @@ module processor;
     memory dmemory(mem_data, mem_addr, , , clk);  // TODO: add missing wires
     control ctrl(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
-    instruction_fetch IFU(instruction, pc, imm16, addr26, is_jump, is_branch, clk);
+    instruction_fetch IFU(instruction, imm16, addr26, is_jump, is_branch, clk);
 
     // assignments
     assign alu_in1 = data_a;    // first input on alu is always from register
@@ -35,12 +35,12 @@ module processor;
     // procedural blocks
     initial begin
         $readmemh("init_reg.dat", registers.registers);
-        $readmemh("init_dmem.dat", dmemory.cells);
+        $readmemh("init_dmem.dat", dmemory.bytes);
     end
 
 endmodule
 
-module instruction_fetch(instruction, pc, imm16, addr26, is_jump, is_branch, clk);
+module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
     // Note: see CS-224 lecture 24 7:00
     output [31:0] instruction;
     input [15:0] imm16;
@@ -48,7 +48,7 @@ module instruction_fetch(instruction, pc, imm16, addr26, is_jump, is_branch, clk
     input is_branch, is_jump;
     input clk;
 
-    output reg [29:0] pc;  // even though our addresses are 8 bits (and 6 bits for instructions)
+    reg [29:0] pc;  // even though our addresses are 8 bits (and 6 bits for instructions)
     wire [29:0] pc_new, pc_seq, pc_jump, pc_branch, pc_seq_or_br, imm16_ext;
     wire [7:0] instr_addr;
 
@@ -62,7 +62,7 @@ module instruction_fetch(instruction, pc, imm16, addr26, is_jump, is_branch, clk
     assign pc_branch = pc_seq + imm16_ext;
 
     initial begin
-        $readmemb("init_imem.dat", imemory.storage.cells);
+        $readmemb("init_imem.dat", imemory.words);
         pc = 0;
     end
 
@@ -175,23 +175,38 @@ module clock_generator(clk);
     end
 endmodule
 
-// Memory (256 x 32bit cells) address is 8 bits, word is 32 bits
-module memory(data_out, addr, data_in, write, clk);
+// Memory (256 x 4 x 8-bit bytes) address is 32 bits (used only 10), word is 32 bits
+module memory(data_out, addr_in, data_in, write, clk);
     input write, clk;
-    input [7:0] addr;
+    input [31:0] addr_in;
     input [31:0] data_in;
     output [31:0] data_out;
 
-    reg [31:0] cells [0:255];
+    reg [7:0] bytes [0:255*4];
 
-    assign data_out = cells[addr];
+    wire [9:0] addr;
+    assign addr = addr_in[9:0];  // we use only 10 bits of address
 
-    always @(posedge clk) if (write) cells[addr] = data_in;
+    // Little endian
+    assign data_out = {bytes[addr+3], bytes[addr+2], bytes[addr+1], bytes[addr]};
+
+    always @(posedge clk) if (write) begin
+        bytes[addr]   = data_in[7:0];
+        bytes[addr+1] = data_in[15:8];
+        bytes[addr+2] = data_in[23:16];
+        bytes[addr+3] = data_in[31:24];
+    end
 endmodule
 
-module rom(data_out, addr);
-    input [7:0] addr;
+// Word-addressable rom
+module rom(data_out, addr_in);
+    input [31:0] addr_in;
     output [31:0] data_out;
 
-    memory storage(data_out, addr, , , );  // acts as a combinational circuit
+    reg [31:0] words [0:255];
+
+    wire [7:0] addr;
+    assign addr = addr_in[7:0];  // use only 8 bits of address
+
+    assign data_out = words[addr];
 endmodule
