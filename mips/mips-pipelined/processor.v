@@ -40,7 +40,7 @@ module processor;
 
 endmodule
 
-module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
+module instruction_fetch(instruction, pc, imm16, addr26, is_jump, is_branch, clk);
     // Note: see CS-224 lecture 24 7:00
     output [31:0] instruction;
     input [15:0] imm16;
@@ -48,15 +48,18 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
     input is_branch, is_jump;
     input clk;
 
-    reg [29:0] pc;  // even though our addresses are 8 bits (and 6 bits for instructions)
-    wire [29:0] pc_new, pc_seq, jump_addr;
+    output reg [29:0] pc;  // even though our addresses are 8 bits (and 6 bits for instructions)
+    wire [29:0] pc_new, pc_seq, pc_jump, pc_branch, pc_seq_or_br, imm16_ext;
     wire [7:0] instr_addr;
 
     rom imemory(instruction, instr_addr);
-    mux2_30 jmux(pc_new, jump_addr, pc_seq, is_jump);
+    mux2_30 jmux(pc_new, pc_jump, pc_seq_or_br, is_jump);
+    mux2_30 bmux(pc_seq_or_br, pc_branch, pc_seq, is_branch);
+    signext16_30 sext_imm(imm16_ext, imm16);
 
-    assign jump_addr = {pc[29:26], addr26};
+    assign pc_jump = {pc[29:26], addr26};
     assign pc_seq = pc + 1;
+    assign pc_branch = pc_seq + imm16_ext;
 
     initial begin
         $readmemb("init_imem.dat", imemory.storage.cells);
@@ -69,6 +72,16 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
 
 endmodule
 
+module signext16_30(out, in);
+    output [29:0] out;
+    input [15:0] in;
+    wire [13:0] sign14;
+    wire s;
+    assign s = in[15];
+    assign sign14 = {s, s, s, s, s, s, s, s, s, s, s, s, s, s};
+    assign out = {sign14, in};
+endmodule
+
 module mux2_30(out, a, b, select);
     output [29:0] out;
     input [29:0] a, b;
@@ -77,12 +90,13 @@ module mux2_30(out, a, b, select);
     assign out = select ? a : b;
 endmodule
 
-module control(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, instruction);
+module control(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
     input [31:0] instruction;
     output [4:0] addr_a, addr_b, addr_in, shamt;
     output [15:0] imm16;
     output [25:0] addr26;
     output is_jump;
+    output is_branch;
 
     wire [5:0] opcode, func;
     wire [4:0] rs, rt, rd;
