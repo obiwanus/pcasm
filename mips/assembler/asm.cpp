@@ -435,11 +435,11 @@ struct CodeGenerator {
     }
 
     if (SPACE == "") {
-      // output in bytes
-      sprintf(at, "%s\n%s\n%s\n%s\n", instruction.substr(0, 8).c_str(),
-              instruction.substr(8, 8).c_str(),
+      // output in bytes (little endian)
+      sprintf(at, "%s\n%s\n%s\n%s\n", instruction.substr(24, 8).c_str(),
               instruction.substr(16, 8).c_str(),
-              instruction.substr(24, 8).c_str());
+              instruction.substr(8, 8).c_str(),
+              instruction.substr(0, 8).c_str());
     } else {
       sprintf(at, "%s\n", instruction.c_str());  // in words
     }
