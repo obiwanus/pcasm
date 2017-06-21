@@ -60,9 +60,10 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
     assign pc_jump = {pc[29:26], addr26};
     assign pc_seq = pc + 1;
     assign pc_branch = pc_seq + imm16_ext;
+    assign instr_addr = {pc, 2'b00};
 
     initial begin
-        $readmemb("init_imem.dat", imemory.words);
+        $readmemb("init_imem.dat", imemory.storage.bytes);
         pc = 0;
     end
 
@@ -198,15 +199,10 @@ module memory(data_out, addr_in, data_in, write, clk);
     end
 endmodule
 
-// Word-addressable rom
-module rom(data_out, addr_in);
-    input [31:0] addr_in;
+// Read-only memory
+module rom(data_out, addr);
+    input [31:0] addr;
     output [31:0] data_out;
 
-    reg [31:0] words [0:255];
-
-    wire [7:0] addr;
-    assign addr = addr_in[7:0];  // use only 8 bits of address
-
-    assign data_out = words[addr];
+    memory storage(data_out, addr, , , );  // acts as a combinational circuit
 endmodule

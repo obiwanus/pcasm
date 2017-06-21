@@ -120,13 +120,9 @@ struct Identifier {
     instr_address_ = instr_num;  // note: word address, not byte address!
   }
 
-  int as_offset() {
-    return this->resolved_value(true);
-  }
+  int as_offset() { return this->resolved_value(true); }
 
-  int as_address() {
-    return this->resolved_value(false);
-  }
+  int as_address() { return this->resolved_value(false); }
 
   int resolved_value(bool offset) {
     assert(index_ >= 0);
@@ -437,7 +433,17 @@ struct CodeGenerator {
     } else {
       assert(!"Invalid code path");
     }
-    sprintf(at, "%s\n", instruction.c_str());
+
+    if (SPACE == "") {
+      // output in bytes
+      sprintf(at, "%s\n%s\n%s\n%s\n", instruction.substr(0, 8).c_str(),
+              instruction.substr(8, 8).c_str(),
+              instruction.substr(16, 8).c_str(),
+              instruction.substr(24, 8).c_str());
+    } else {
+      sprintf(at, "%s\n", instruction.c_str());  // in words
+    }
+
     return strlen(at);
   }
 
