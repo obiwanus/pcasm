@@ -10,7 +10,6 @@
   ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
 
 static const int kMaxNameLen = 100;
-static const int kInstrLenInBytes = 4;
 
 struct String {
   char *text;
@@ -118,7 +117,7 @@ struct Identifier {
 
   Identifier(int index, int instr_num) {
     index_ = index;
-    instr_address_ = instr_num * kInstrLenInBytes;
+    instr_address_ = instr_num;  // note: word address, not byte address!
   }
 
   int as_offset() {
@@ -475,7 +474,8 @@ struct CodeGenerator {
                token.line_num);
         exit(1);
       }
-      entry.value = instructions_.size() * kInstrLenInBytes;
+      entry.value = instructions_.size();  // = instruction word address!
+                                           // (i.e. proper byte address / 4)
       entry.resolved = true;
 
       this->advance_token();
