@@ -70,7 +70,7 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
 
     initial begin
         $readmemb("init_imem.dat", imemory.storage.bytes);
-        pc = 0;
+        pc = -1;
     end
 
     always @(negedge clk) begin
