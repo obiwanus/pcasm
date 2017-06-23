@@ -1,5 +1,3 @@
-`timescale 1ns/1ns
-
 module processor;
     wire clk, reg_write;
 
