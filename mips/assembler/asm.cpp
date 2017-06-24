@@ -697,7 +697,7 @@ String read_file_into_string(const char *filename) {
 
 int main(int argc, const char *argv[]) {
   char *filename =
-      (char *)"../mips-pipelined/programs/2_memset_subroutine.mips";
+      (char *)"../processor/programs/2_memset_subroutine.mips";
   if (argc == 2) {
     // printf("format: asm <file>\n");
     // return 0;
@@ -705,7 +705,7 @@ int main(int argc, const char *argv[]) {
   }
   String source = read_file_into_string(filename);
   if (source.len <= 0) {
-    printf("Can't open file %s.", filename);
+    printf("Can't open file '%s'\n", filename);
     return 1;
   }
   Tokenizer tokenizer = Tokenizer(source);
