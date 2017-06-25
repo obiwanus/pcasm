@@ -1,4 +1,4 @@
-module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
+module ifu(instruction, imm16, addr26, is_jump, is_branch, clk);
     // Note: see CS-224 lecture 24 7:00
     output [31:0] instruction;
     input [15:0] imm16;
@@ -17,14 +17,8 @@ module instruction_fetch(instruction, imm16, addr26, is_jump, is_branch, clk);
 
     assign pc_jump = {pc[29:26], addr26};
     assign pc_seq = pc + 1;
-    assign pc_branch = pc_seq + imm16_ext;
+    assign pc_branch = pc + imm16_ext;  // ???? should this be pc_seq + imm16 ?
     assign instr_addr = {pc, 2'b00};
-
-    // TMP: remove me
-    assign imm16 = 0;
-    assign addr26 = 0;
-    assign is_branch = 0;
-    assign is_jump = 0;
 
     initial begin
         $readmemb("init/imem.dat", imemory.storage.bytes);
