@@ -13,9 +13,7 @@ module test_ifu(input clk);
     localparam INSTR_2 = 32'b00100000000001000000000000001000;
 
     initial begin
-        $readmemb("tests/ifu/imem.dat", MUT.imemory.storage.bytes);
-
-        $display("===== Checking IFU ======")
+        $readmemb("tests/ifu/test_imem.dat", MUT.imemory.storage.bytes);
 
         // Test sequential fetch
         is_branch = 0;
@@ -80,6 +78,9 @@ module test_ifu(input clk);
         end
         is_branch = 0;
 
-        if (error !== 1) $display("===== IFU OK ======");
+        if (error !== 1)
+            $display("===== IFU OK ======");
+        else
+            $display("===== IFU FAIL =====");
     end
 endmodule
