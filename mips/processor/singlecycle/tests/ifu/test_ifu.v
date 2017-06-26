@@ -15,6 +15,8 @@ module test_ifu(input clk);
     initial begin
         $readmemb("tests/ifu/imem.dat", MUT.imemory.storage.bytes);
 
+        $display("===== Checking IFU ======")
+
         // Test sequential fetch
         is_branch = 0;
         is_jump = 0;

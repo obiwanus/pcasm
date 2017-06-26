@@ -13,6 +13,7 @@ module test_registers(clk);
 
     initial begin
        $readmemh("tests/registers/reg.dat", MUT.registers);
+       $display("===== Checking register file =====");
 
        // Test fetch
        addr_a = 0;
@@ -42,6 +43,33 @@ module test_registers(clk);
            $display("Fetch 2 failed");
            error = 1;
        end
+
+       @(posedge clk);
+
+       // Test not write
+       addr_in = 6;
+       data_in = 32'h13;
+       write = 0;
+       @(posedge clk);  // wait for the data NOT to be written
+       addr_a = 6;
+       #1;
+       if (data_a === 32'h13) begin
+         $display("Write unexpectedly happened");
+         error = 1;
+       end
+
+       // Test write
+       addr_in = 6;
+       data_in = 32'h13;
+       write = 1;
+       @(posedge clk);  // wait for the data to be written
+       addr_a = 6;
+       #1;
+       if (data_a !== 32'h13) begin
+         $display("Write 1 failed");
+         error = 1;
+       end
+
 
        if (error !== 1) $display("===== Register file OK =====");
     end
