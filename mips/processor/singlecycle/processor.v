@@ -32,6 +32,7 @@ module processor;
 
     // procedural blocks
     initial begin
+        $readmemb("init/imem.dat", IFU.imemory.storage.bytes);
         $readmemh("init/reg.dat", registers.registers);
         $readmemh("init/dmem.dat", dmemory.bytes);
     end

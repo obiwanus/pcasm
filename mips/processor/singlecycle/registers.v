@@ -12,5 +12,5 @@ module register_file(data_a, data_b, addr_a, addr_b, addr_in, data_in, write, cl
 
     initial registers[5'b0] = 32'b0;  // hard-wired zero register
 
-    always @(posedge clk) if (write && addr_a) registers[addr_in] = data_in;
+    always @(posedge clk) if (write && addr_a !== 0) registers[addr_in] = data_in;
 endmodule

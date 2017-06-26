@@ -1,3 +1,6 @@
 module testbench;
-    test_ifu IFU();
+    clock_generator clkgen(clk);
+
+    test_ifu IFU(clk);
+    test_registers register_file(clk);
 endmodule

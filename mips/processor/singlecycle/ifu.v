@@ -21,7 +21,6 @@ module ifu(instruction, imm16, addr26, is_jump, is_branch, clk);
     assign instr_addr = {pc, 2'b00};
 
     initial begin
-        $readmemb("init/imem.dat", imemory.storage.bytes);
         pc = -1;
     end
 

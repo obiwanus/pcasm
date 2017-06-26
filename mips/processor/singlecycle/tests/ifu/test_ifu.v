@@ -1,20 +1,19 @@
-module test_ifu;
+module test_ifu(input clk);
+
     wire [31:0] instruction;
     reg [15:0] imm16 = 0;
     reg [25:0] addr26 = 0;
     reg is_branch = 0, is_jump = 0;
-    wire clk;
     reg error = 0;
 
-    clock_generator clkgen(clk);
-    ifu IFU(instruction, imm16, addr26, is_jump, is_branch, clk);
+    ifu MUT(instruction, imm16, addr26, is_jump, is_branch, clk);
 
     localparam INSTR_0 = 32'b11001010000011110011001101010101;
     localparam INSTR_1 = 32'b00000000001100110000111111111111;
     localparam INSTR_2 = 32'b00100000000001000000000000001000;
 
     initial begin
-        $readmemb("tests/ifu/imem.dat", IFU.imemory.storage.bytes);
+        $readmemb("tests/ifu/imem.dat", MUT.imemory.storage.bytes);
 
         // Test sequential fetch
         is_branch = 0;
@@ -79,6 +78,6 @@ module test_ifu;
         end
         is_branch = 0;
 
-        if (error != 1) $display("======== IFU OK ==========");
+        if (error !== 1) $display("===== IFU OK ======");
     end
 endmodule
