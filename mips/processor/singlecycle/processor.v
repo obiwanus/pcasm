@@ -3,7 +3,7 @@ module processor;
 
     // memory wires
     wire [4:0] addr_a, addr_b, addr_in;
-    wire [7:0] mem_addr;
+    wire [31:0] mem_addr;
     wire [31:0] data_a, data_b, reg_data_in;
     wire [31:0] instruction, mem_data;
 

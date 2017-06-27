@@ -697,7 +697,7 @@ String read_file_into_string(const char *filename) {
 
 int main(int argc, const char *argv[]) {
   char *filename =
-      (char *)"../processor/programs/2_memset_subroutine.mips";
+      (char *)"../processor/programs/1_fefe.mips";
   if (argc == 2) {
     // printf("format: asm <file>\n");
     // return 0;
