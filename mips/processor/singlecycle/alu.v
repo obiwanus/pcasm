@@ -1,3 +1,5 @@
+`include "_const.v"
+
 module alu(out, zout, a, b, op);
     input [31:0] a, b;
     input [2:0] op;
@@ -6,19 +8,13 @@ module alu(out, zout, a, b, op);
 
     reg [31:0] diff;
 
-    localparam OP_AND = 3'b000;
-    localparam OP_OR  = 3'b001;
-    localparam OP_ADD = 3'b010;
-    localparam OP_SUB = 3'b110;
-    localparam OP_SLT = 3'b111;
-
     always @(a or b or op) begin
         case (op)
-            3'b000: out = a & b;
-            3'b001: out = a | b;
-            3'b010: out = a + b;
-            3'b110: out = a + 1 + (~b);
-            3'b111: begin
+            `OP_AND: out = a & b;
+            `OP_OR:  out = a | b;
+            `OP_ADD: out = a + b;
+            `OP_SUB: out = a + 1 + (~b);
+            `OP_SLT: begin
                         diff = a + 1 + (~b);
                         out = diff[31] ? 1 : 0;
                     end
