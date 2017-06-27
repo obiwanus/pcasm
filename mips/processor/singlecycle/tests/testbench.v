@@ -5,4 +5,5 @@ module testbench;
     test_registers register_file(clk);
     test_memory memory(clk);
     test_alu alu();
+    test_signext signext();
 endmodule
