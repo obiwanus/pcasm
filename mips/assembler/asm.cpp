@@ -406,7 +406,7 @@ struct CodeGenerator {
 
   int encode_instruction(Instruction i, char *at) {
     const int kLen = 40;
-    const std::string SPACE = "";
+    const std::string SPACE = " ";
     std::string instruction;
     instruction.reserve(kLen);
     i.set_opcode_and_func();  // not nice I know

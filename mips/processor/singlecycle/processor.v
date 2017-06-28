@@ -23,7 +23,7 @@ module processor;
     clock_generator clk_gen(clk);
     register_file registers(data_a, data_b, addr_a, addr_b, addr_in, reg_data_in, reg_write, clk);
     memory dmemory(mem_data, mem_addr, , , clk);  // TODO: add missing wires
-    control ctrl(addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
+    control ctrl(alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op);
     ifu IFU(instruction, imm16, addr26, is_jump, is_branch, clk);
 

@@ -12,6 +12,7 @@ module testbench;
     test_memory memory(clk);
     test_alu alu();
     test_signext signext();
+    test_control control();
 
     // Processor tests
     test_fefe fefe();
