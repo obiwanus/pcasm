@@ -7,7 +7,7 @@ module test_addi;
     initial begin
         $readmemb("tests/instructions/addi/addi_imem.dat", CPU.IFU.imemory.storage.bytes);
 
-        repeat(3) @(posedge CPU.clk);
+        repeat(4) @(posedge CPU.clk);
 
         error = (
             CPU.registers.registers[`REG_S0] !== 32'd0 ||
