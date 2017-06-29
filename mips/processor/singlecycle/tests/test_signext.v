@@ -2,23 +2,33 @@
 
 module test_signext;
     reg error = 0;
-    wire [29:0] out;
+    wire [29:0] out30;
+    wire [31:0] out32;
     reg [15:0] in;
-    signext16_30 MUT(out, in);
+    signext16_30 MUT1(out30, in);
+    signext16_32 MUT2(out32, in);
 
     initial begin
 
         in = 16'd23;
         #1;
-        if (out !== 30'd23) begin
-            $display("Positive sign extension failed");
+        if (out30 !== 30'd23) begin
+            $display("Positive sign extension 30 failed");
+            error = 1;
+        end
+        if (out32 !== 32'd23) begin
+            $display("Positive sign extension 32 failed");
             error = 1;
         end
 
         in = -16'd23;
         #1;
-        if (out !== -30'd23) begin
-            $display("Negative sign extension failed");
+        if (out30 !== -30'd23) begin
+            $display("Negative sign extension 30 failed");
+            error = 1;
+        end
+        if (out32 !== -32'd23) begin
+            $display("Negative sign extension 32 failed");
             error = 1;
         end
 

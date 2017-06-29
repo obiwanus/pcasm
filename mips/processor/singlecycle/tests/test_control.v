@@ -9,11 +9,10 @@ module test_control;
     wire [4:0] addr_a, addr_b, addr_in, shamt;
     wire [15:0] imm16;
     wire [25:0] addr26;
-    wire is_jump;
-    wire is_branch;
+    wire is_jump, is_branch, alu_src;
     wire [2:0] alu_op;
 
-    control MUT(alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
+    control MUT(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
 
     initial begin
         // addi    $s0, $zero, 0xFEFE
@@ -26,9 +25,11 @@ module test_control;
             is_jump !== 0 ||
             is_branch !== 0 ||
             shamt !== 0 ||
-            alu_op !== `OP_ADD
+            alu_op !== `OP_ADD ||
+            alu_src !== `ALU_SRC_IMM16 ||
+            1 !== 1
         );
-        if (error !== 0) $display("control: addi failed");
+        if (error !== 0) $display("===== control: addi failed");
 
         // sll     $s0, $s0, 16
         instruction = 32'b00000000000100001000010000000000;
@@ -41,7 +42,7 @@ module test_control;
             shamt !== 16
             //alu_op !== `OP_SHIFT ??????
         );
-        if (error !== 0) $display("control: sll failed");
+        if (error !== 0) $display("===== control: sll failed");
 
         // add     $t0, $zero, $zero
         instruction = 32'b00000000000000000100000000100000;
@@ -55,7 +56,7 @@ module test_control;
             shamt !== 0 ||
             alu_op !== `OP_ADD
         );
-        if (error !== 0) $display("control: add failed");
+        if (error !== 0) $display("===== control: add failed");
 
         // sw      $s0, 0($t0)
         instruction = 32'b00000000000000000100000000100000;
@@ -69,7 +70,7 @@ module test_control;
             shamt !== 0
             // write !== 1  ????????
         );
-        if (error !== 0) $display("control: sw failed");
+        if (error !== 0) $display("===== control: sw failed");
 
         // slt     $t1, $t0, $s1
         instruction = 32'b00000001000100010100100000101010;
@@ -83,7 +84,7 @@ module test_control;
             shamt !== 0 ||
             alu_op !== `OP_SLT
         );
-        if (error !== 0) $display("control: slt failed");
+        if (error !== 0) $display("===== control: slt failed");
 
         // 000101 01001 00000 1111111111111101
         // bne     $t1, $zero, loop
@@ -98,7 +99,7 @@ module test_control;
             shamt !== 0 ||
             alu_op !== `OP_SLT
         );
-        if (error !== 0) $display("control: bne failed");
+        if (error !== 0) $display("===== control: bne failed");
 
         // TODO:
         // and     0x24    rd, rs, rt

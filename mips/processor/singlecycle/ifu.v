@@ -11,8 +11,8 @@ module ifu(instruction, imm16, addr26, is_jump, is_branch, clk);
     wire [31:0] instr_addr;
 
     rom imemory(instruction, instr_addr);
-    mux2_30 jmux(pc_new, pc_jump, pc_seq_or_br, is_jump);
-    mux2_30 bmux(pc_seq_or_br, pc_branch, pc_seq, is_branch);
+    mux2 #(30) jmux(pc_new, pc_jump, pc_seq_or_br, is_jump);
+    mux2 #(30) bmux(pc_seq_or_br, pc_branch, pc_seq, is_branch);
     signext16_30 sext_imm(imm16_ext, imm16);
 
     assign pc_jump = {pc[29:26], addr26};

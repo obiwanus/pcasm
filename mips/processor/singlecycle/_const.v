@@ -34,7 +34,6 @@
 `define OPCODE_JAL      'h03
 `define OPCODE_J        'h02
 
-
 // Functions
 `define FUNC_ADD     'h20
 `define FUNC_AND     'h24
@@ -95,5 +94,8 @@
 `define REG_SP      29
 `define REG_FP      30
 `define REG_RA      31
+
+`define ALU_SRC_DATA_B  0
+`define ALU_SRC_IMM16   1
 
 `endif

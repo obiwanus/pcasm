@@ -1,6 +1,7 @@
-module mux2_30(out, a, b, select);
-    output [29:0] out;
-    input [29:0] a, b;
+module mux2(out, a, b, select);
+    parameter width = 32;
+    output [width-1:0] out;
+    input [width-1:0] a, b;
     input select;
 
     assign out = select ? a : b;
