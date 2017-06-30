@@ -1,4 +1,5 @@
 `include "_const.v"
+`include "_assert.v"
 
 module test_addi;
     reg error = 0;
@@ -9,13 +10,10 @@ module test_addi;
 
         repeat(4) @(posedge CPU.clk);
 
-        error = (
-            CPU.registers.registers[`REG_S0] !== 32'd0 ||
-            CPU.registers.registers[`REG_S1] !== 32'd3 ||
-            CPU.registers.registers[`REG_T0] !== 32'd255 ||
-            CPU.registers.registers[`REG_T1] !== -32'd3 ||
-            1 !== 1
-        );
+        `assertEq(CPU.registers.registers[`REG_S0], 32'd0)
+        `assertEq(CPU.registers.registers[`REG_S1], 32'd3)
+        `assertEq(CPU.registers.registers[`REG_T0], 32'd255)
+        `assertEq(CPU.registers.registers[`REG_T1], -32'd4)
 
         if (error === 0)
             $display("===== instructions: addi OK =====");
