@@ -273,7 +273,7 @@ int find_or_add_identifier(std::string identifier) {
 int parse_int(char *string) {
   long value = strtol(string, NULL, 0);
   if (value == 0 && strcmp(string, "0") != 0) {
-    printf("Warning: parsing %s as 0", string);
+    printf("Warning: parsing %s as 0\n", string);
   }
   return (int)value;
 }

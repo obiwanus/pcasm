@@ -19,5 +19,7 @@ module testbench;
 
     // Instruction tests
     test_addi addi();
+    test_add add();
+    test_and and_t();
 
 endmodule

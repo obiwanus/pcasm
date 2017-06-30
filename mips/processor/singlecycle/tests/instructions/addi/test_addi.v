@@ -13,12 +13,9 @@ module test_addi;
         `assertEq(CPU.registers.registers[`REG_S0], 32'd0)
         `assertEq(CPU.registers.registers[`REG_S1], 32'd3)
         `assertEq(CPU.registers.registers[`REG_T0], 32'd255)
-        `assertEq(CPU.registers.registers[`REG_T1], -32'd4)
+        `assertEq(CPU.registers.registers[`REG_T1], -32'd3)
 
-        if (error === 0)
-            $display("===== instructions: addi OK =====");
-        else
-            $display("===== instructions: addi FAIL =====");
+        `printResults
     end
 
 endmodule
