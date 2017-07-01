@@ -169,7 +169,11 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
 
             end
             `FUNC_SLL: begin
-
+                alu_op = `OP_SLL;
+                shamt = shift_amount;
+                addr_in = rd;
+                addr_a = rt;
+                reg_write = 1;
             end
             `FUNC_SRL: begin
 

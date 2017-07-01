@@ -8,10 +8,11 @@ module test_alu;
 
     reg [31:0] a = 0, b = 0;
     reg [2:0] op = 0;
+    reg [4:0] shamt = 0;
     wire [31:0] out;
     wire zout;
 
-    alu MUT(out, zout, a, b, op);
+    alu MUT(out, zout, a, b, op, shamt);
 
     initial begin
 
@@ -63,6 +64,14 @@ module test_alu;
         #1;
         `assertEq(out, 1)
         `assertEq(zout, 0)
+
+        a = 23;
+        shamt = 3;
+        op = `OP_SLL;
+        #1;
+        `assertEq(out, 184)
+        `assertEq(zout, 0)
+        shamt = 0;
 
         `printResults
 

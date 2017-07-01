@@ -21,5 +21,6 @@ module testbench;
     test_addi addi();
     test_add add();
     test_and and_t();
+    test_sll sll();
 
 endmodule
