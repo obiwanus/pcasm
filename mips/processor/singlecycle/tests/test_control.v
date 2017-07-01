@@ -36,7 +36,7 @@ module test_control;
         `assertEq(is_jump, 0)
         `assertEq(is_branch, 0)
         `assertEq(shamt, 16)
-        //alu_op !== `OP_SHIFT ??????
+        `assertEq(alu_op, `OP_SLL)
 
         // add     $t0, $zero, $zero
         instruction = 32'b00000000000000000100000000100000;
@@ -49,17 +49,6 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_ADD)
 
-        // sw      $s0, 0($t0)
-        instruction = 32'b00000000000000000100000000100000;
-        #1;
-        `assertEq(addr_a, 5'b10000)  // value
-        `assertEq(addr_b, 5'b01000)  // address
-        `assertEq(imm16, 16'b0)      // offset
-        `assertEq(is_jump, 0)
-        `assertEq(is_branch, 0)
-        `assertEq(shamt, 0)
-         // write !== 1  ????????
-
         // slt     $t1, $t0, $s1
         instruction = 32'b00000001000100010100100000101010;
         #1;
@@ -68,17 +57,6 @@ module test_control;
         `assertEq(addr_in, 5'b01001)
         `assertEq(is_jump, 0)
         `assertEq(is_branch, 0)
-        `assertEq(shamt, 0)
-        `assertEq(alu_op, `OP_SLT)
-
-        // bne     $t1, $zero, loop
-        instruction = 32'b00010101001000001111111111111101;
-        #1;
-        `assertEq(addr_a, 5'b01001)
-        `assertEq(addr_b, 5'b00000)
-        `assertEq(imm16, 16'b1111111111111101)
-        `assertEq(is_jump, 0)
-        `assertEq(is_branch, 1)
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_SLT)
 
@@ -93,6 +71,27 @@ module test_control;
         `assertEq(is_branch, 0)
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_AND)
+
+        // // bne     $t1, $zero, loop
+        // instruction = 32'b00010101001000001111111111111101;
+        // #1;
+        // `assertEq(addr_a, 5'b01001)
+        // `assertEq(addr_b, 5'b00000)
+        // `assertEq(imm16, 16'b1111111111111101)
+        // `assertEq(is_jump, 0)
+        // `assertEq(is_branch, 1)
+        // `assertEq(shamt, 0)
+
+        // // sw      $s0, 0($t0)
+        // instruction = 32'b00000000000000000100000000100000;
+        // #1;
+        // `assertEq(addr_a, 5'b10000)  // value
+        // `assertEq(addr_b, 5'b01000)  // address
+        // `assertEq(imm16, 16'b0)      // offset
+        // `assertEq(is_jump, 0)
+        // `assertEq(is_branch, 0)
+        // `assertEq(shamt, 0)
+        //  // write !== 1  ????????
 
         // TODO:
         // and     0x24    rd, rs, rt
