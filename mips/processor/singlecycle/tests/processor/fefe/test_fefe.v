@@ -2,6 +2,7 @@
 * Tests the program 1_fefe.mips, which
 * puts 0xFEFE in the first 64 bytes in memory
 */
+`include "_assert.v"
 
 module test_fefe;  // not covfefe
     reg error = 0;
@@ -13,17 +14,12 @@ module test_fefe;  // not covfefe
 
         repeat(19) @(posedge CPU.clk);
 
-        error = (
-            CPU.dmemory.bytes[0] !== 8'hFE ||
-            CPU.dmemory.bytes[1] !== 8'hFE ||
-            CPU.dmemory.bytes[2] !== 8'hFE ||
-            CPU.dmemory.bytes[3] !== 8'hFE
-        );
+        `assertEq(CPU.dmemory.bytes[0], 8'hFE)
+        `assertEq(CPU.dmemory.bytes[1], 8'hFE)
+        `assertEq(CPU.dmemory.bytes[2], 8'hFE)
+        `assertEq(CPU.dmemory.bytes[3], 8'hFE)
 
-        if (error !== 1)
-            $display("===== fefe OK so far =====");
-        else
-            $display("===== fefe FAIL =====");
+        `printResults
     end
 
 endmodule

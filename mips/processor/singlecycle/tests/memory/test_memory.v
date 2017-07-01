@@ -1,4 +1,5 @@
 `timescale 1ns/1ns
+`include "_assert.v"
 
 module test_memory(clk);
     input clk;
@@ -17,18 +18,12 @@ module test_memory(clk);
         // Test fetch
         addr_in = 0;
         #1;
-        if (data_out !== 32'h01000000) begin
-            $display("Fetch 1 failed");
-            error = 1;
-        end
+        `assertEq(data_out, 32'h01000000)
         @(posedge clk);
 
         addr_in = 4;
         #1;
-        if (data_out !== 32'h04030201) begin
-            $display("Fetch 2 failed");
-            error = 1;
-        end
+        `assertEq(data_out, 32'h04030201)
         @(posedge clk);
 
         // Test write
@@ -38,23 +33,14 @@ module test_memory(clk);
         @(posedge clk);
         write = 0;
         #1;
-        if (data_out !== 32'hF0C0D0E0) begin
-            $display("Write 1 failed");
-            error = 1;
-        end
+        `assertEq(data_out, 32'hF0C0D0E0)
 
         // Test unaligned read
         addr_in = 6;
         #1;
-        if (data_out != 32'hD0E00403) begin
-            $display("Unaligned read 1 failed");
-            error = 1;
-        end
+        `assertEq(data_out, 32'hD0E00403)
 
-        if (error !== 1)
-            $display("===== Memory OK =====");
-        else
-            $display("===== Memory FAIL =====");
+        `printResults
 
     end
 endmodule

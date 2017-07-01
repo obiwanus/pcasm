@@ -1,3 +1,5 @@
+`include "_assert.v"
+
 module test_ifu(input clk);
 
     wire [31:0] instruction;
@@ -21,47 +23,29 @@ module test_ifu(input clk);
         addr26 = 26'b111;
 
         @(posedge clk);
-        if (instruction != INSTR_0) begin
-            $display("Sequential fetch 1 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_0)
         @(posedge clk);
-        if (instruction != INSTR_1) begin
-            $display("Sequential fetch 2 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_1)
         @(posedge clk);
-        if (instruction != INSTR_2) begin
-            $display("Sequential fetch 3 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_2)
 
         // Test jump
         is_branch = 0;
         is_jump = 1;
         addr26 = 26'h0;  // jump back to instruction 0
         @(posedge clk);
-        if (instruction !== INSTR_0) begin
-            $display("Jump back to 0 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_0)
         is_jump = 1;
         addr26 = 26'h2;  // jump to instruction 2
         @(posedge clk);
-        if (instruction !== INSTR_2) begin
-            $display("Jump to instruction 2 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_2)
 
         // Test branch
         is_jump = 0;
         is_branch = 1;
         imm16 = -2;
         @(posedge clk);
-        if (instruction !== INSTR_0) begin
-            $display("Branch to instruction 0 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_0)
         is_branch = 0;
 
         // Wait 2 cycles - pc should be 2
@@ -72,15 +56,9 @@ module test_ifu(input clk);
         is_jump = 0;
         imm16 = -1;
         @(posedge clk);
-        if (instruction !== INSTR_1) begin
-            $display("Branch to instruction 1 failed");
-            error = 1;
-        end
+        `assertEq(instruction, INSTR_1)
         is_branch = 0;
 
-        if (error !== 1)
-            $display("===== IFU OK ======");
-        else
-            $display("===== IFU FAIL =====");
+        `printResults
     end
 endmodule

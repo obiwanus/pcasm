@@ -1,4 +1,5 @@
 `timescale 1ns/1ns
+`include "_assert.v"
 
 module test_signext;
     reg error = 0;
@@ -12,30 +13,15 @@ module test_signext;
 
         in = 16'd23;
         #1;
-        if (out30 !== 30'd23) begin
-            $display("Positive sign extension 30 failed");
-            error = 1;
-        end
-        if (out32 !== 32'd23) begin
-            $display("Positive sign extension 32 failed");
-            error = 1;
-        end
+        `assertEq(out30, 30'd23)
+        `assertEq(out32, 32'd23)
 
         in = -16'd23;
         #1;
-        if (out30 !== -30'd23) begin
-            $display("Negative sign extension 30 failed");
-            error = 1;
-        end
-        if (out32 !== -32'd23) begin
-            $display("Negative sign extension 32 failed");
-            error = 1;
-        end
+        `assertEq(out30, -30'd23)
+        `assertEq(out32, -32'd23)
 
-        if (error !== 1)
-            $display("===== Sign ext OK =====");
-        else
-            $display("===== Sign ext FAIL =====");
+        `printResults
 
     end
 endmodule

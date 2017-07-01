@@ -1,5 +1,6 @@
 `timescale 1ns/1ns
 `include "_const.v"
+`include "_assert.v"
 
 module test_control;
 
@@ -18,88 +19,68 @@ module test_control;
         // addi    $s0, $zero, 0xFEFE
         instruction = 32'b00100000000100001111111011111110;
         #1;
-        error = (
-            addr_a !== 5'b0 ||
-            addr_in !== 5'b10000 ||
-            imm16 !== 16'hFEFE ||
-            is_jump !== 0 ||
-            is_branch !== 0 ||
-            shamt !== 0 ||
-            alu_op !== `OP_ADD ||
-            alu_src !== `ALU_SRC_IMM16 ||
-            1 !== 1
-        );
-        if (error !== 0) $display("===== control: addi failed");
+        `assertEq(addr_a, 5'b0)
+        `assertEq(addr_in, 5'b10000)
+        `assertEq(imm16, 16'hFEFE)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_ADD)
+        `assertEq(alu_src, `ALU_SRC_IMM16)
 
         // sll     $s0, $s0, 16
         instruction = 32'b00000000000100001000010000000000;
         #1;
-        error = (
-            addr_a !== 5'b10000 ||
-            addr_in !== 5'b10000 ||
-            is_jump !== 0 ||
-            is_branch !== 0 ||
-            shamt !== 16
-            //alu_op !== `OP_SHIFT ??????
-        );
-        if (error !== 0) $display("===== control: sll failed");
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_in, 5'b10000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 16)
+        //alu_op !== `OP_SHIFT ??????
 
         // add     $t0, $zero, $zero
         instruction = 32'b00000000000000000100000000100000;
         #1;
-        error = (
-            addr_a !== 5'b0 ||
-            addr_b !== 5'b0 ||
-            addr_in !== 5'b01000 ||
-            is_jump !== 0 ||
-            is_branch !== 0 ||
-            shamt !== 0 ||
-            alu_op !== `OP_ADD
-        );
-        if (error !== 0) $display("===== control: add failed");
+        `assertEq(addr_a, 5'b0)
+        `assertEq(addr_b, 5'b0)
+        `assertEq(addr_in, 5'b01000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_ADD)
 
         // sw      $s0, 0($t0)
         instruction = 32'b00000000000000000100000000100000;
         #1;
-        error = (
-            addr_a !== 5'b10000 ||  // value
-            addr_b !== 5'b01000 ||  // address
-            imm16 !== 16'b0 ||      // offset
-            is_jump !== 0 ||
-            is_branch !== 0 ||
-            shamt !== 0
-            // write !== 1  ????????
-        );
-        if (error !== 0) $display("===== control: sw failed");
+        `assertEq(addr_a, 5'b10000)  // value
+        `assertEq(addr_b, 5'b01000)  // address
+        `assertEq(imm16, 16'b0)      // offset
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+         // write !== 1  ????????
 
         // slt     $t1, $t0, $s1
         instruction = 32'b00000001000100010100100000101010;
         #1;
-        error = (
-            addr_a !== 5'b01000 ||
-            addr_b !== 5'b10001 ||
-            addr_in !== 5'b01001 ||
-            is_jump !== 0 ||
-            is_branch !== 0 ||
-            shamt !== 0 ||
-            alu_op !== `OP_SLT
-        );
-        if (error !== 0) $display("===== control: slt failed");
+        `assertEq(addr_a, 5'b01000)
+        `assertEq(addr_b, 5'b10001)
+        `assertEq(addr_in, 5'b01001)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_SLT)
 
-        // 000101 01001 00000 1111111111111101
         // bne     $t1, $zero, loop
         instruction = 32'b00010101001000001111111111111101;
         #1;
-        error = (
-            addr_a !== 5'b01001 ||
-            addr_b !== 5'b00000 ||
-            imm16 !== 16'b1111111111111101 ||
-            is_jump !== 0 ||
-            is_branch !== 1 ||
-            shamt !== 0 ||
-            alu_op !== `OP_SLT
-        );
-        if (error !== 0) $display("===== control: bne failed");
+        `assertEq(addr_a, 5'b01001)
+        `assertEq(addr_b, 5'b00000)
+        `assertEq(imm16, 16'b1111111111111101)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 1)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_SLT)
 
         // TODO:
         // and     0x24    rd, rs, rt
@@ -143,11 +124,7 @@ module test_control;
         // sw      0x2B    rt, imm(rs)     store word in rt into memory at rs+imm
 
 
-
-        if (error === 0)
-            $display("===== Control OK =====");
-        else
-            $display("===== Control FAIL =====");
+        `printResults
 
     end
 endmodule

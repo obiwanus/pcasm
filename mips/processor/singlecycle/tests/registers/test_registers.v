@@ -1,4 +1,5 @@
 `timescale 1ns/1ns
+`include "_assert.v"
 
 module test_registers(clk);
     input clk;
@@ -18,30 +19,24 @@ module test_registers(clk);
         addr_a = 0;
         addr_b = 0;
         #1;
-        if (data_a !== 0 || data_b !== 0) begin
-            $display("Zero register fetch failed");
-            error = 1;
-        end
+        `assertEq(data_a, 0)
+        `assertEq(data_b, 0)
 
         @(posedge clk);
 
         addr_a = 1;
         addr_b = 2;
         #1;
-        if (data_a !== 32'h14 || data_b !== 32'h40) begin
-            $display("Fetch 1 failed");
-            error = 1;
-        end
+        `assertEq(data_a, 32'h14)
+        `assertEq(data_b, 32'h40)
 
         @(posedge clk);
 
         addr_a = 6;
         addr_b = 9;
         #1;
-        if (data_a !== 32'h32 || data_b !== 32'h28) begin
-            $display("Fetch 2 failed");
-            error = 1;
-        end
+        `assertEq(data_a, 32'h32)
+        `assertEq(data_b, 32'h28)
 
         @(posedge clk);
 
@@ -64,10 +59,7 @@ module test_registers(clk);
         @(posedge clk);  // wait for the data to be written
         addr_a = 6;
         #1;
-        if (data_a !== 32'h13) begin
-            $display("Write 1 failed");
-            error = 1;
-        end
+        `assertEq(data_a, 32'h13)
         write = 0;
 
         // Test write to the zero register
@@ -77,15 +69,9 @@ module test_registers(clk);
         @(posedge clk);  // wait for the data to be written
         addr_a = 0;
         #1;
-        if (data_a !== 32'h00) begin
-            $display("Write to the zero register unexpectedly succeeded");
-            error = 1;
-        end
+        `assertEq(data_a, 32'h00)
         write = 0;
 
-        if (error !== 1)
-            $display("===== Register file OK =====");
-        else
-            $display("===== Register file FAIL =====");
+        `printResults
     end
 endmodule
