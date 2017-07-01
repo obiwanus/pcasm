@@ -51,70 +51,70 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 reg_write = 1;
             end
             `OPCODE_ANDI: begin
-
+                $display("OPCODE_ANDI not implemented");
             end
             `OPCODE_BALMN: begin
-
+                $display("OPCODE_BALMN not implemented");
             end
             `OPCODE_BALMZ: begin
-
+                $display("OPCODE_BALMZ not implemented");
             end
             `OPCODE_BEQ: begin
-
+                $display("OPCODE_BEQ not implemented");
             end
             `OPCODE_BEQAL: begin
-
+                $display("OPCODE_BEQAL not implemented");
             end
             `OPCODE_BMN: begin
-
+                $display("OPCODE_BMN not implemented");
             end
             `OPCODE_BMZ: begin
-
+                $display("OPCODE_BMZ not implemented");
             end
             `OPCODE_BNE: begin
-
+                $display("OPCODE_BNE not implemented");
             end
             `OPCODE_BNEAL: begin
-
+                $display("OPCODE_BNEAL not implemented");
             end
             `OPCODE_JALM: begin
-
+                $display("OPCODE_JALM not implemented");
             end
             `OPCODE_JALPC: begin
-
+                $display("OPCODE_JALPC not implemented");
             end
             `OPCODE_JM: begin
-
+                $display("OPCODE_JM not implemented");
             end
             `OPCODE_JPC: begin
-
+                $display("OPCODE_JPC not implemented");
             end
             `OPCODE_LW: begin
-
+                $display("OPCODE_LW not implemented");
             end
             `OPCODE_ORI: begin
-
+                $display("OPCODE_ORI not implemented");
             end
             `OPCODE_SW: begin
-
+                $display("OPCODE_SW not implemented");
             end
             `OPCODE_BALN: begin
-
+                $display("OPCODE_BALN not implemented");
             end
             `OPCODE_BALZ: begin
-
+                $display("OPCODE_BALZ not implemented");
             end
             `OPCODE_BN: begin
-
+                $display("OPCODE_BN not implemented");
             end
             `OPCODE_BZ: begin
-
+                $display("OPCODE_BZ not implemented");
             end
             `OPCODE_JAL: begin
-
+                $display("OPCODE_JAL not implemented");
             end
             `OPCODE_J: begin
-
+                $display("OPCODE_J not implemented");
             end
 
             `OPCODE_RTYPE: begin
@@ -142,28 +142,28 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 reg_write = 1;
             end
             `FUNC_BALRN: begin
-
+                $display("FUNC_BALRN not implemented");
             end
             `FUNC_BALRZ: begin
-
+                $display("FUNC_BALRZ not implemented");
             end
             `FUNC_BRN: begin
-
+                $display("FUNC_BRN not implemented");
             end
             `FUNC_BRZ: begin
-
+                $display("FUNC_BRZ not implemented");
             end
             `FUNC_JALR: begin
-
+                $display("FUNC_JALR not implemented");
             end
             `FUNC_JR: begin
-
+                $display("FUNC_JR not implemented");
             end
             `FUNC_NOR: begin
-
+                $display("FUNC_NOR not implemented");
             end
             `FUNC_OR: begin
-
+                $display("FUNC_OR not implemented");
             end
             `FUNC_SLT: begin
                 alu_op = `OP_SLT;
@@ -181,10 +181,10 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 reg_write = 1;
             end
             `FUNC_SRL: begin
-
+                $display("FUNC_SRL not implemented");
             end
             `FUNC_SUB: begin
-
+                $display("FUNC_SUB not implemented");
             end
         endcase
     end

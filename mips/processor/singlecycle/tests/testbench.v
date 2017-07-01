@@ -15,7 +15,7 @@ module testbench;
     test_control control();
 
     // Processor tests
-    test_fefe fefe();
+    // test_fefe fefe();
 
     // Instruction tests
     test_addi addi();

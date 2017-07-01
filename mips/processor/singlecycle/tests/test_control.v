@@ -72,6 +72,13 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_AND)
 
+        // andi    0x0C    rt, rs, imm     rt = rs & zeroext(imm)
+        // instruction = ;
+        // #1;
+        $display("TODO: test control ANDI");
+
+        // $display("TODO: test control ");
+
         // // bne     $t1, $zero, loop
         // instruction = 32'b00010101001000001111111111111101;
         // #1;
@@ -94,7 +101,6 @@ module test_control;
         //  // write !== 1  ????????
 
         // TODO:
-        // and     0x24    rd, rs, rt
         // balrn   0x17    rs, rd          if [z]=0, branch and link to rs, store return in rd (31 by default)
         // balrz   0x16    rs, rd          if [z]=1, ---^---
         // brn     0x15    rs              if [z]=0, branch to rs
@@ -105,7 +111,6 @@ module test_control;
         // or      0x25    rd, rs, rt
         // srl     0x02    rd, rt, shamt   rd = rt >> shamt
         // sub     0x22    rd, rs, rt      rd = rs - rt
-        // andi    0x0C    rt, rs, imm     rt = rs & zeroext(imm)
         // balmn   0x17    rt, imm(rs)     if [z]=0, branches to address in memory and links to rt(31)
         // balmz   0x16    rt, imm(rs)     if [z]=1, ---^---
         // beq     0x04    rs, rt, offset  if rs=rt, branch to offset
