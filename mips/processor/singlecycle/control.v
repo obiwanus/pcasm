@@ -100,7 +100,11 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 $display("OPCODE_LW not implemented");
             end
             `OPCODE_ORI: begin
-                $display("OPCODE_ORI not implemented");
+                alu_op = `OP_OR;
+                alu_src = `ALU_SRC_ZEXT_IMM16;
+                addr_in = rt;
+                addr_a = rs;
+                reg_write = 1;
             end
             `OPCODE_SW: begin
                 $display("OPCODE_SW not implemented");

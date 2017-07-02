@@ -73,7 +73,6 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_AND)
 
-        // 001100 10000 01001 0000000011001111
         // andi    rt, rs, imm     rt = rs & zeroext(imm)
         instruction = 32'b00110010000010010000000011001111;
         #1;
@@ -84,6 +83,18 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(imm16, 16'b0000000011001111)
         `assertEq(alu_op, `OP_AND)
+
+        // 001101 10000 01001 0000000011000000
+        // ori     $t1, $s0, 0xC0
+        instruction = 32'b00110110000010010000000011000000;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_in, 5'b01001)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(imm16, 16'b0000000011000000)
+        `assertEq(alu_op, `OP_OR)
 
         // $display("TODO: test control ");
 
