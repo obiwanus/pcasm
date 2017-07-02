@@ -108,10 +108,21 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_OR)
 
+        // 000000 10000 10001 01000 00000 100101
+        // or     $t0, $s0, $s1
+        instruction = 32'b00000010000100010100000000100101;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_b, 5'b10001)
+        `assertEq(addr_in, 5'b01000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_NOR)
+
         // $display("TODO: test control ");
 
         // nor     0x27    rd, rs, rt
-        // or      0x25    rd, rs, rt
         // srl     0x02    rd, rt, shamt   rd = rt >> shamt
         // sub     0x22    rd, rs, rt      rd = rs - rt
 

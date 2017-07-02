@@ -13,9 +13,11 @@ module alu(out, zout, a, b, op, shamt);
         case (op)
             `OP_AND: out = a & b;
             `OP_OR:  out = a | b;
+            `OP_NOR: out = ~(a | b);
             `OP_ADD: out = a + b;
             `OP_SUB: out = a + 1 + (~b);
             `OP_SLL: out = a << shamt;
+            `OP_SRL: out = a >> shamt;
             `OP_SLT: begin
                         diff = a + 1 + (~b);
                         out = diff[31] ? 1 : 0;
