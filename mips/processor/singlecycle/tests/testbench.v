@@ -23,6 +23,7 @@ module testbench;
     test_addi addi();
     test_add add();
     test_and and_t();
+    test_or or_t();
     test_andi andi();
     test_ori ori();
     test_sll sll();

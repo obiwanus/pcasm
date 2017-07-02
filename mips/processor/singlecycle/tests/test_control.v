@@ -96,7 +96,25 @@ module test_control;
         `assertEq(imm16, 16'b0000000011000000)
         `assertEq(alu_op, `OP_OR)
 
+        // 000000 10000 10001 01000 00000 100101
+        // or     $t0, $s0, $s1
+        instruction = 32'b00000010000100010100000000100101;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_b, 5'b10001)
+        `assertEq(addr_in, 5'b01000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_OR)
+
         // $display("TODO: test control ");
+
+        // nor     0x27    rd, rs, rt
+        // or      0x25    rd, rs, rt
+        // srl     0x02    rd, rt, shamt   rd = rt >> shamt
+        // sub     0x22    rd, rs, rt      rd = rs - rt
+
 
         // // bne     $t1, $zero, loop
         // instruction = 32'b00010101001000001111111111111101;
@@ -126,10 +144,6 @@ module test_control;
         // brz     0x14    rs              if [z]=1, branch to rs
         // jalr    0x09    rs, rd          unconditional jump and link
         // jr      0x08    rs              unconditional jump
-        // nor     0x27    rd, rs, rt
-        // or      0x25    rd, rs, rt
-        // srl     0x02    rd, rt, shamt   rd = rt >> shamt
-        // sub     0x22    rd, rs, rt      rd = rs - rt
         // balmn   0x17    rt, imm(rs)     if [z]=0, branches to address in memory and links to rt(31)
         // balmz   0x16    rt, imm(rs)     if [z]=1, ---^---
         // beq     0x04    rs, rt, offset  if rs=rt, branch to offset
@@ -142,21 +156,12 @@ module test_control;
         // jm      0x12    imm(rs)         jump to address in memory
         // jpc     0x1E    offset          jump to pc-relative address
         // lw      0x23    rt, imm(rs)     load word at rs+imm into rt
-        // ori     0x0D    rt, rs, imm     rt = rs | zeroext(imm)
         // baln    0x1B    target26        if [z]=0, branch to target and link 31
         // balz    0x1A    target26        if [z]=1, branch to target and link 31
         // bn      0x19    target26        if [z]=0, branch to target
         // bz      0x18    target26        if [z]=1, branch to target
         // jal     0x03    target26        jump and link 31
         // j       0x02    target26        jump
-
-        // DONE:
-        // add     0x20    rd, rs, rt
-        // addi    0x08    rt, rs, imm     rt = rs + imm
-        // bne     0x05    rs, rt, offset  if rs!=rt, branch to offset
-        // slt     0x2a    rd, rs, rt      set rd to (rs < rt)
-        // sll     0x00    rd, rt, shamt   rd = rt << shamt
-        // sw      0x2B    rt, imm(rs)     store word in rt into memory at rs+imm
 
 
         `printResults

@@ -396,17 +396,19 @@ struct Tokenizer {
 
 struct CodeGenerator {
   size_t at_ = 0;
+  bool nice_print_;
   std::vector<Instruction> instructions_;
   std::vector<Token> tokens_;
 
-  CodeGenerator(std::vector<Token> tokens) {
+  CodeGenerator(std::vector<Token> tokens, bool nice_print) {
     instructions_.reserve(100);
     tokens_ = tokens;  // copy but it's ok
+    nice_print_ = nice_print;
   }
 
   int encode_instruction(Instruction i, char *at) {
     const int kLen = 40;
-    const std::string SPACE = "";
+    std::string SPACE = nice_print_ ? " " : "";
     std::string instruction;
     instruction.reserve(kLen);
     i.set_opcode_and_func();  // not nice I know
@@ -698,10 +700,14 @@ String read_file_into_string(const char *filename) {
 int main(int argc, const char *argv[]) {
   char *filename =
       (char *)"../processor/programs/1_fefe.mips";
-  if (argc == 2) {
+  bool nice_print = false;
+  if (argc > 1) {
     // printf("format: asm <file>\n");
     // return 0;
     filename = (char *)argv[1];
+    if (argc > 2) {
+      nice_print = true;
+    }
   }
   String source = read_file_into_string(filename);
   if (source.len <= 0) {
@@ -711,7 +717,7 @@ int main(int argc, const char *argv[]) {
   Tokenizer tokenizer = Tokenizer(source);
   tokenizer.process_source();
 
-  CodeGenerator code = CodeGenerator(tokenizer.tokens_);
+  CodeGenerator code = CodeGenerator(tokenizer.tokens_, nice_print);
   String generated_code = code.generate();
   printf("%s", generated_code.text);
 
