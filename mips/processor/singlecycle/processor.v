@@ -2,12 +2,13 @@ module processor;
     wire clk;
     wire [4:0] addr_a, addr_b, addr_in;
     wire [31:0] mem_addr;
-    wire [31:0] data_a, data_b, reg_data_in, sext_imm16;
+    wire [31:0] data_a, data_b, reg_data_in, sext_imm16, zext_imm16;
     wire [31:0] instruction, mem_data;
 
     // alu wires
     wire [31:0] alu_out, alu_in1, alu_in2;
     wire [2:0] alu_op;
+    wire [1:0] alu_src;
     wire alu_zout;
 
     wire [4:0] shamt;
@@ -15,7 +16,7 @@ module processor;
     wire [25:0] addr26;
 
     // control wires
-    wire is_jump, is_branch, reg_write, mem_write, alu_src;
+    wire is_jump, is_branch, reg_write, mem_write;
 
     clock_generator clk_gen(clk);
     register_file registers(data_a, data_b, addr_a, addr_b, addr_in, reg_data_in, reg_write, clk);
@@ -26,8 +27,9 @@ module processor;
 
     assign reg_data_in = alu_out;
     assign alu_in1 = data_a;    // first input on alu is always from register
-    mux2 alu_src_select(alu_in2, sext_imm16, data_b, alu_src);
+    mux4 alu_src_select(alu_in2, data_b, sext_imm16, zext_imm16, , alu_src);
     signext16_32 sext_imm(sext_imm16, imm16);
+    zeroext16_32 zext_imm(zext_imm16, imm16);
 
     initial begin
         $readmemb("init/imem.dat", IFU.imemory.storage.bytes);

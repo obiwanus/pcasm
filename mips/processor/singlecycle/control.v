@@ -7,7 +7,8 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
     output [25:0] addr26;
     output reg is_jump;
     output reg is_branch;
-    output reg alu_src;  // 0 = data_b, 1 = sign ext imm16
+    output reg [1:0] alu_src;  // 0 = data_b, 1 = sign ext imm16,
+                               // 2 = zero ext imm16
     output reg reg_write;
     output reg [2:0] alu_op;
 
@@ -32,7 +33,7 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
         addr_a = 0;
         addr_b = 0;
         addr_in = 0;
-        alu_src = 0;
+        alu_src = `ALU_SRC_DATA_B;
         shamt = 0;
     end
 
@@ -42,16 +43,22 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
         is_branch = 0;
         is_jump = 0;
         reg_write = 0;
+        alu_src = `ALU_SRC_DATA_B;
+
         case (opcode)
             `OPCODE_ADDI: begin
                 alu_op = `OP_ADD;
-                alu_src = `ALU_SRC_IMM16;
+                alu_src = `ALU_SRC_SEXT_IMM16;
                 addr_in = rt;
                 addr_a = rs;
                 reg_write = 1;
             end
             `OPCODE_ANDI: begin
-                $display("OPCODE_ANDI not implemented");
+                alu_op = `OP_AND;
+                alu_src = `ALU_SRC_ZEXT_IMM16;
+                addr_in = rt;
+                addr_a = rs;
+                reg_write = 1;
             end
             `OPCODE_BALMN: begin
                 $display("OPCODE_BALMN not implemented");

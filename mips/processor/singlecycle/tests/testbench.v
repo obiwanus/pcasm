@@ -12,6 +12,8 @@ module testbench;
     test_memory memory(clk);
     test_alu alu();
     test_signext signext();
+    test_zeroext zeroext();
+    test_mux mux();
     test_control control();
 
     // Processor tests
@@ -21,6 +23,7 @@ module testbench;
     test_addi addi();
     test_add add();
     test_and and_t();
+    test_andi andi();
     test_sll sll();
     test_slt slt();
 

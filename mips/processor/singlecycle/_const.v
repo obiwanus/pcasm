@@ -98,7 +98,8 @@
 `define REG_FP      30
 `define REG_RA      31
 
-`define ALU_SRC_DATA_B  0
-`define ALU_SRC_IMM16   1
+`define ALU_SRC_DATA_B          2'b00
+`define ALU_SRC_SEXT_IMM16      2'b01
+`define ALU_SRC_ZEXT_IMM16      2'b10
 
 `endif

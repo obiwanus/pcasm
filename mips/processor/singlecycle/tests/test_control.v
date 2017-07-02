@@ -10,7 +10,8 @@ module test_control;
     wire [4:0] addr_a, addr_b, addr_in, shamt;
     wire [15:0] imm16;
     wire [25:0] addr26;
-    wire is_jump, is_branch, alu_src;
+    wire is_jump, is_branch;
+    wire [1:0] alu_src;
     wire [2:0] alu_op;
 
     control MUT(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
@@ -26,7 +27,7 @@ module test_control;
         `assertEq(is_branch, 0)
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_ADD)
-        `assertEq(alu_src, `ALU_SRC_IMM16)
+        `assertEq(alu_src, `ALU_SRC_SEXT_IMM16)
 
         // sll     $s0, $s0, 16
         instruction = 32'b00000000000100001000010000000000;
@@ -72,10 +73,17 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_AND)
 
-        // andi    0x0C    rt, rs, imm     rt = rs & zeroext(imm)
-        // instruction = ;
-        // #1;
-        $display("TODO: test control ANDI");
+        // 001100 10000 01001 0000000011001111
+        // andi    rt, rs, imm     rt = rs & zeroext(imm)
+        instruction = 32'b00110010000010010000000011001111;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_in, 5'b01001)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(imm16, 16'b0000000011001111)
+        `assertEq(alu_op, `OP_AND)
 
         // $display("TODO: test control ");
 
