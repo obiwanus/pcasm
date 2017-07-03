@@ -17,6 +17,9 @@ module test_control;
     control MUT(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
 
     initial begin
+
+        // ALU instructions
+
         // addi    $s0, $zero, 0xFEFE
         instruction = 32'b00100000000100001111111011111110;
         #1;
@@ -144,6 +147,18 @@ module test_control;
         `assertEq(alu_op, `OP_NOR)
 
 
+        // JUMPS
+
+        // 000010 00000000000000000000000100
+        // j target26
+        instruction = 32'b00001000000000000000000000000100;
+        #1;
+        `assertEq(addr26, 26'b00000000000000000000000100)
+        `assertEq(is_jump, 1)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+
+
         // // bne     $t1, $zero, loop
         // instruction = 32'b00010101001000001111111111111101;
         // #1;
@@ -189,7 +204,6 @@ module test_control;
         // bn      0x19    target26        if [z]=0, branch to target
         // bz      0x18    target26        if [z]=1, branch to target
         // jal     0x03    target26        jump and link 31
-        // j       0x02    target26        jump
 
 
         `printResults

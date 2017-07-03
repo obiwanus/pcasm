@@ -125,7 +125,7 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 $display("OPCODE_JAL not implemented");
             end
             `OPCODE_J: begin
-                $display("OPCODE_J not implemented");
+                is_jump = 1;
             end
 
             `OPCODE_RTYPE: begin
@@ -135,22 +135,20 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
     end
 
     always @(instruction) if (opcode == `OPCODE_RTYPE) begin
+        // defaults
+        addr_a = rs;
+        addr_b = rt;
+        addr_in = rd;
+        reg_write = 1;
+        alu_src = `ALU_SRC_DATA_B;
+        shamt = 0;
+
         case (func)
             `FUNC_ADD: begin
                 alu_op = `OP_ADD;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
             `FUNC_AND: begin
                 alu_op = `OP_AND;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
             `FUNC_BALRN: begin
                 $display("FUNC_BALRN not implemented");
@@ -172,49 +170,25 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
             end
             `FUNC_NOR: begin
                 alu_op = `OP_NOR;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
             `FUNC_OR: begin
                 alu_op = `OP_OR;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
             `FUNC_SLT: begin
                 alu_op = `OP_SLT;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
             `FUNC_SLL: begin
                 alu_op = `OP_SLL;
                 shamt = shift_amount;
-                addr_in = rd;
                 addr_a = rt;
-                reg_write = 1;
             end
             `FUNC_SRL: begin
                 alu_op = `OP_SRL;
                 shamt = shift_amount;
-                addr_in = rd;
                 addr_a = rt;
-                reg_write = 1;
             end
             `FUNC_SUB: begin
                 alu_op = `OP_SUB;
-                alu_src = `ALU_SRC_DATA_B;
-                addr_in = rd;
-                addr_a = rs;
-                addr_b = rt;
-                reg_write = 1;
             end
         endcase
     end

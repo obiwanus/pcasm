@@ -19,7 +19,7 @@ module testbench;
     // Processor tests
     // test_fefe fefe();
 
-    // Instruction tests
+    // ALU instruction tests
     test_addi addi();
     test_add add();
     test_sub sub();
@@ -31,5 +31,8 @@ module testbench;
     test_sll sll();
     test_srl srl();
     test_slt slt();
+
+    // Jump tests
+    test_j jump();
 
 endmodule
