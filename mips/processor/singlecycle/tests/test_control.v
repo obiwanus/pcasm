@@ -39,6 +39,16 @@ module test_control;
         `assertEq(shamt, 16)
         `assertEq(alu_op, `OP_SLL)
 
+        // srl     $s0, $s0, 16
+        instruction = 32'b00000000000100001000010000000000;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_in, 5'b10000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 16)
+        `assertEq(alu_op, `OP_SRL)
+
         // add     $t0, $zero, $zero
         instruction = 32'b00000000000000000100000000100000;
         #1;
@@ -120,9 +130,7 @@ module test_control;
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_NOR)
 
-        // $display("TODO: test control ");
 
-        // srl     0x02    rd, rt, shamt   rd = rt >> shamt
         // sub     0x22    rd, rs, rt      rd = rs - rt
 
 

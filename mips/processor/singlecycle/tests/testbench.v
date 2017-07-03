@@ -28,6 +28,7 @@ module testbench;
     test_andi andi();
     test_ori ori();
     test_sll sll();
+    test_srl srl();
     test_slt slt();
 
 endmodule
