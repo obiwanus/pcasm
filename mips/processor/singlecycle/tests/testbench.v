@@ -22,6 +22,7 @@ module testbench;
     // Instruction tests
     test_addi addi();
     test_add add();
+    test_sub sub();
     test_and and_t();
     test_or or_t();
     test_nor nor_t();

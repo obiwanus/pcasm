@@ -39,14 +39,15 @@ module test_control;
         `assertEq(shamt, 16)
         `assertEq(alu_op, `OP_SLL)
 
+        // 000000 00000 10000 01000 00001 000010
         // srl     $s0, $s0, 16
-        instruction = 32'b00000000000100001000010000000000;
+        instruction = 32'b00000000000100000100000001000010;
         #1;
         `assertEq(addr_a, 5'b10000)
-        `assertEq(addr_in, 5'b10000)
+        `assertEq(addr_in, 5'b01000)
         `assertEq(is_jump, 0)
         `assertEq(is_branch, 0)
-        `assertEq(shamt, 16)
+        `assertEq(shamt, 1)
         `assertEq(alu_op, `OP_SRL)
 
         // add     $t0, $zero, $zero
@@ -59,6 +60,18 @@ module test_control;
         `assertEq(is_branch, 0)
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_ADD)
+
+        // 000000 10000 10001 01000 00000 100010
+        // sub     $t0, $s0, $s1
+        instruction = 32'b00000010000100010100000000100010;
+        #1;
+        `assertEq(addr_a, 5'b10000)
+        `assertEq(addr_b, 5'b10001)
+        `assertEq(addr_in, 5'b01000)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 0)
+        `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_SUB)
 
         // slt     $t1, $t0, $s1
         instruction = 32'b00000001000100010100100000101010;
@@ -129,9 +142,6 @@ module test_control;
         `assertEq(is_branch, 0)
         `assertEq(shamt, 0)
         `assertEq(alu_op, `OP_NOR)
-
-
-        // sub     0x22    rd, rs, rt      rd = rs - rt
 
 
         // // bne     $t1, $zero, loop
