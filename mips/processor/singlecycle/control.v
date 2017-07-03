@@ -171,7 +171,12 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 $display("FUNC_JR not implemented");
             end
             `FUNC_NOR: begin
-                $display("FUNC_NOR not implemented");
+                alu_op = `OP_NOR;
+                alu_src = `ALU_SRC_DATA_B;
+                addr_in = rd;
+                addr_a = rs;
+                addr_b = rt;
+                reg_write = 1;
             end
             `FUNC_OR: begin
                 alu_op = `OP_OR;

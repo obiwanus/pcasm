@@ -16,10 +16,10 @@ module test_nor;
         `assertEq(CPU.registers.registers[`REG_S3], 32'h00)
         `assertEq(CPU.registers.registers[`REG_S4], 32'hFF)
 
-        `assertEq(CPU.registers.registers[`REG_T0], 32'hFF)
-        `assertEq(CPU.registers.registers[`REG_T1], 32'hFE)
-        `assertEq(CPU.registers.registers[`REG_T2], 32'hCE)
-        `assertEq(CPU.registers.registers[`REG_T3], 32'hFF)
+        `assertEq(CPU.registers.registers[`REG_T0], 32'hFFFFFF00)
+        `assertEq(CPU.registers.registers[`REG_T1], 32'hFFFFFF01)
+        `assertEq(CPU.registers.registers[`REG_T2], 32'hFFFFFF31)
+        `assertEq(CPU.registers.registers[`REG_T3], 32'hFFFFFF00)
 
         `printResults
     end
