@@ -166,6 +166,7 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
                 $display("FUNC_JALR not implemented");
             end
             `FUNC_JR: begin
+                reg_write = 0;
                 $display("FUNC_JR not implemented");
             end
             `FUNC_NOR: begin

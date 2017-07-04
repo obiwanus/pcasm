@@ -36,4 +36,7 @@ module testbench;
     test_j j();
     // test_jr jr();
 
+    // Branch tests
+    test_bne bne();
+
 endmodule
