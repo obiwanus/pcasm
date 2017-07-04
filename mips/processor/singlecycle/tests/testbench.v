@@ -33,6 +33,7 @@ module testbench;
     test_slt slt();
 
     // Jump tests
-    test_j jump();
+    test_j j();
+    // test_jr jr();
 
 endmodule

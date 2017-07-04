@@ -10,7 +10,7 @@ module test_control;
     wire [4:0] addr_a, addr_b, addr_in, shamt;
     wire [15:0] imm16;
     wire [25:0] addr26;
-    wire is_jump, is_branch;
+    wire is_jump, is_branch, reg_write;
     wire [1:0] alu_src;
     wire [2:0] alu_op;
 
@@ -158,16 +158,27 @@ module test_control;
         `assertEq(is_branch, 0)
         `assertEq(shamt, 0)
 
+        // 000000 11111 00000 00000 00000 001000
+        // jr $ra
+        // TODO:
+        // instruction = 32'b00000011111000000000000000001000;
+        // #1;
+        // `assertEq(addr_a, 5'b11111)
+        // `assertEq(addr_a, 5'b11111)
+        // `assertEq(is_jump, 1)
+        // `assertEq(is_branch, 0)
+        // `assertEq(shamt, 0)
+        // `assertEq(reg_write, 0)
 
         // // bne     $t1, $zero, loop
-        // instruction = 32'b00010101001000001111111111111101;
-        // #1;
-        // `assertEq(addr_a, 5'b01001)
-        // `assertEq(addr_b, 5'b00000)
-        // `assertEq(imm16, 16'b1111111111111101)
-        // `assertEq(is_jump, 0)
-        // `assertEq(is_branch, 1)
-        // `assertEq(shamt, 0)
+        instruction = 32'b00010101001000001111111111111101;
+        #1;
+        `assertEq(addr_a, 5'b01001)
+        `assertEq(addr_b, 5'b00000)
+        `assertEq(imm16, 16'b1111111111111101)
+        `assertEq(is_jump, 0)
+        `assertEq(is_branch, 1)
+        `assertEq(shamt, 0)
 
         // // sw      $s0, 0($t0)
         // instruction = 32'b00000000000000000100000000100000;
