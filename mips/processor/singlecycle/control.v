@@ -191,6 +191,9 @@ module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16
             `FUNC_SUB: begin
                 alu_op = `OP_SUB;
             end
+            default: begin
+                reg_write = 0;
+            end
         endcase
     end
 

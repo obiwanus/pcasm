@@ -43,7 +43,7 @@ module test_ifu(input clk);
         // Test branch
         is_jump = 0;
         is_branch = 1;
-        imm16 = -2;
+        imm16 = -3;
         @(posedge clk);
         `assertEq(instruction, INSTR_0)
         is_branch = 0;
@@ -54,7 +54,7 @@ module test_ifu(input clk);
 
         is_branch = 1;
         is_jump = 0;
-        imm16 = -1;
+        imm16 = -2;
         @(posedge clk);
         `assertEq(instruction, INSTR_1)
         is_branch = 0;

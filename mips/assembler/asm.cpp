@@ -133,7 +133,9 @@ struct Identifier {
     }
     if (offset) {
       // Calculate offset from the instruction using it to the label
-      return entry.value - instr_address_;
+      // note: branches use offsets from the next instruction (PC + 4)
+      // to the target, hence + 1 below
+      return entry.value - (instr_address_ + 1);
     }
     return entry.value;
   }

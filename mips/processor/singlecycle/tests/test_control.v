@@ -170,15 +170,16 @@ module test_control;
         // `assertEq(shamt, 0)
         // `assertEq(reg_write, 0)
 
-        // // bne     $t1, $zero, loop
-        instruction = 32'b00010101001000001111111111111101;
+        // 000101 01010 01011 1111111111111100
+        // bne     $t2, $t3, loop
+        instruction = 32'b00010101010010111111111111111100;
         #1;
-        `assertEq(addr_a, 5'b01001)
-        `assertEq(addr_b, 5'b00000)
-        `assertEq(imm16, 16'b1111111111111101)
+        `assertEq(addr_a, 5'b01010)
+        `assertEq(addr_b, 5'b01011)
+        `assertEq(imm16, 16'b1111111111111100)
         `assertEq(is_jump, 0)
-        `assertEq(is_branch, 1)
         `assertEq(shamt, 0)
+        `assertEq(alu_op, `OP_SUB)
 
         // // sw      $s0, 0($t0)
         // instruction = 32'b00000000000000000100000000100000;

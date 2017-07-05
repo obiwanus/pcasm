@@ -17,7 +17,7 @@ module ifu(instruction, imm16, addr26, is_jump, is_branch, clk);
 
     assign pc_jump = {pc[29:26], addr26};
     assign pc_seq = pc + 1;
-    assign pc_branch = pc + sext_imm16;  // ???? should this be pc_seq + imm16 ?
+    assign pc_branch = pc_seq + sext_imm16;
     assign instr_addr = {pc, 2'b00};
 
     initial begin

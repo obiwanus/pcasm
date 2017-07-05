@@ -3,7 +3,7 @@
     addi    $t0, $zero, 0
     addi    $t1, $zero, 0
 
-    addi    $t2, $zero, 1  # counter
+    addi    $t2, $zero, 0  # counter
     addi    $t3, $zero, 5  # number of cycles
 
 loop:
