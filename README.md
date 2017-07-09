@@ -2,6 +2,9 @@
 This is a simple implementation of a single cycle MIPS-like processor in Verilog, with a slightly different instruction set than standard MIPS32.
 ### Project structure
 `mips/assembler`: a simple assembler, in C
+
 `mips/processor/instructions`: the list of all supported instructions
+
 `mips/processor/singlecycle`: the Verilog implementation of the processor
+
 `mips/processor/singlecycle/tests`: a set of hardware tests, including one for each instruction and each module, which are combined in a single testbench
