@@ -1,5 +1,5 @@
 # MIPS processor
-This is a simple implementation of a single cycle MIPS-like processor in Verilog, with a slightly different instruction set than standard MIPS32.
+This is a simple implementation of a single cycle MIPS-like processor in Verilog, with a slightly different instruction set than the standard MIPS32.
 ### Project structure
 `mips/assembler`: a simple assembler, in C
 
