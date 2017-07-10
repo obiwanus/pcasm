@@ -8,3 +8,6 @@ This is a simple implementation of a single cycle MIPS-like processor in Verilog
 `mips/processor/singlecycle`: the Verilog implementation of the processor
 
 `mips/processor/singlecycle/tests`: a set of hardware tests, including one for each instruction and each module, which are combined in a single testbench
+
+### Control signals table
+https://docs.google.com/a/ivanovs.info/spreadsheets/d/1ARzTCMWv4Y96ZnglDix2fxHa96c0Vds3O4Jouae4WkE/edit?usp=sharing
