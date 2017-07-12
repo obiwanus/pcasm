@@ -1,40 +1,46 @@
 `include "_const.v"
 
-module control(reg_write, alu_src, alu_op, addr_a, addr_b, addr_in, shamt, imm16, addr26, is_jump, is_branch, instruction);
-    input [31:0] instruction;
-    output reg [4:0] addr_a, addr_b, addr_in, shamt;
-    output [15:0] imm16;
-    output [25:0] addr26;
-    output reg is_jump;
-    output reg is_branch;
-    output reg [1:0] alu_src;  // 0 = data_b, 1 = sign ext imm16,
-                               // 2 = zero ext imm16
-    output reg reg_write;
-    output reg [2:0] alu_op;
+module control(
+    input [31:0] instruction,
+
+    output reg reg_write,
+    output reg reg_dst,
+    output reg write_reg31,
+    output reg link,
+    output reg alu_src,
+    output reg [2:0] alu_op,
+    output reg ext_op,
+    output reg mem_write,
+    output reg mem_to_reg,
+    output reg is_jump,
+    output reg zero_branch,
+    output reg need_zero,
+    output reg status_branch,
+    output reg need_st_Z,
+    output reg [1:0] pc_select
+);
 
     wire [5:0] opcode, func;
-    wire [4:0] rs, rt, rd, shift_amount;
 
-    // split instruction into wires
     assign opcode = instruction[31:26];
-    assign rs = instruction[25:21];
-    assign rt = instruction[20:16];
-    assign rd = instruction[15:11];
-    assign shift_amount = instruction[10:6];
     assign func = instruction[5:0];
-    assign imm16 = instruction[15:0];
-    assign addr26 = instruction[25:0];
 
     initial begin
-        is_branch = 0;
-        is_jump = 0;
         reg_write = 0;
-        alu_op = 0;
-        addr_a = 0;
-        addr_b = 0;
-        addr_in = 0;
-        alu_src = `ALU_SRC_DATA_B;
-        shamt = 0;
+        reg_dst = 0;
+        write_reg31 = 0;
+        link = 0;
+        alu_src = 0;
+        alu_op = 3'b0;
+        ext_op = 0;
+        mem_write = 0;
+        mem_to_reg = 0;
+        is_jump = 0;
+        zero_branch = 0;
+        need_zero = 0;
+        status_branch = 0;
+        need_st_Z = 0;
+        pc_select = 2'b0;
     end
 
     // Doing it the easy way now, will rewrite if in the future it seems useful to do

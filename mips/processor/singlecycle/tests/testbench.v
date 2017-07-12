@@ -14,7 +14,7 @@ module testbench;
     test_signext signext();
     test_zeroext zeroext();
     test_mux mux();
-    // test_control control();
+    test_control control();
 
     // Processor tests
     // test_fefe fefe();
