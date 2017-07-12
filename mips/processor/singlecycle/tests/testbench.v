@@ -14,26 +14,26 @@ module testbench;
     test_signext signext();
     test_zeroext zeroext();
     test_mux mux();
-    test_control control();
+    // test_control control();
 
     // Processor tests
     // test_fefe fefe();
 
     // ALU instruction tests
-    test_addi addi();
-    test_add add();
-    test_sub sub();
-    test_and and_t();
-    test_or or_t();
-    test_nor nor_t();
-    test_andi andi();
-    test_ori ori();
-    test_sll sll();
-    test_srl srl();
-    test_slt slt();
+    // test_addi addi();
+    // test_add add();
+    // test_sub sub();
+    // test_and and_t();
+    // test_or or_t();
+    // test_nor nor_t();
+    // test_andi andi();
+    // test_ori ori();
+    // test_sll sll();
+    // test_srl srl();
+    // test_slt slt();
 
     // Jump tests
-    test_j j();
+    // test_j j();
     // test_jr jr();
 
     // Branch tests

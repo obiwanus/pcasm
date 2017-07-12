@@ -8,7 +8,7 @@ balrn   0x17    rs, rd          if [z]=0, branch and link to rs, store return in
 balrz   0x16    rs, rd          if [z]=1, ---^---
 brn     0x15    rs              if [z]=0, branch to rs
 brz     0x14    rs              if [z]=1, branch to rs
-jalr    0x09    rs, rd          unconditional jump and link
+jalr    0x09    rs, rd          unconditional jump and link rd
 jr      0x08    rs              unconditional jump
 nor     0x27    rd, rs, rt
 or      0x25    rd, rs, rt
