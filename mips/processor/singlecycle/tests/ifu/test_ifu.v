@@ -117,6 +117,28 @@ module test_ifu(input clk);
         `assertEq(branch_taken, 1)
         @(posedge clk);
         `assertEq(instruction, INSTR_0)
+        status_branch = 0;
+
+        // Test register jump
+        is_jump = 1;
+        pc_reg = 8;
+        pc_select = 0'b10;  // select register
+        #1;
+        `assertEq(branch_taken, 1)
+        @(posedge clk);
+        `assertEq(instruction, INSTR_2)
+
+        // Test memory conditional jump
+        is_jump = 0;
+        zero_branch = 1;
+        need_zero = 1;
+        zero = 1;
+        pc_mem = 0;
+        pc_select = 0'b11;  // select memory
+        #1;
+        `assertEq(branch_taken, 1)
+        @(posedge clk);
+        `assertEq(instruction, INSTR_0)
 
         `printResults
     end
