@@ -16,8 +16,8 @@ module alu(out, zout, a, b, op, shamt);
             `OP_NOR: out = ~(a | b);
             `OP_ADD: out = a + b;
             `OP_SUB: out = a + 1 + (~b);
-            `OP_SLL: out = a << shamt;
-            `OP_SRL: out = a >> shamt;
+            `OP_SLL: out = b << shamt;
+            `OP_SRL: out = b >> shamt;
             `OP_SLT: begin
                         diff = a + 1 + (~b);
                         out = diff[31] ? 1 : 0;

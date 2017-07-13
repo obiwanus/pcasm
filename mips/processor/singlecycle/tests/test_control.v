@@ -145,17 +145,24 @@ module test_control;
         // `assertEq(need_st_Z,         )
         // `assertEq(pc_select,    2'b00)
 
-        // TODO:
-        // // slt     $t1, $t0, $s1
-        // instruction = 32'b00000001000100010100100000101010;
-        // #1;
-        // `assertEq(addr_a, 5'b01000)
-        // `assertEq(addr_b, 5'b10001)
-        // `assertEq(addr_in, 5'b01001)
-        // `assertEq(is_jump, 0)
-        // `assertEq(zero_branch, 0)
-        // `assertEq(shamt, 0)
-        // `assertEq(alu_op, `OP_SLT)
+        // slt     $t1, $t0, $s1
+        instruction = 32'b00000001000100010100100000101010;
+        #1;
+        `assertEq(reg_write,        1)
+        `assertEq(reg_dst,          0)
+        `assertEq(write_reg31,      0)
+        `assertEq(link,             0)
+        `assertEq(alu_src,          0)
+        `assertEq(alu_op,     `OP_SLT)
+        // `assertEq(ext_op,            )
+        `assertEq(mem_write,        0)
+        `assertEq(mem_to_reg,       0)
+        `assertEq(is_jump,          0)
+        `assertEq(zero_branch,      0)
+        // `assertEq(need_zero,         )
+        `assertEq(status_branch,    0)
+        // `assertEq(need_st_Z,         )
+        // `assertEq(pc_select,    2'b00)
 
         // 000000 10000 10001 01000 00000 100100
         // and     $t0, $s0, $s1

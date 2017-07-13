@@ -65,7 +65,7 @@ module test_alu;
         `assertEq(out, 1)
         `assertEq(zout, 0)
 
-        a = 23;
+        b = 23;
         shamt = 3;
         op = `OP_SLL;
         #1;

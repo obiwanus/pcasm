@@ -22,6 +22,8 @@ module control(
 
     wire [5:0] opcode, func;
 
+    // Maybe pass just there 2 signals?
+    // This would mean rewriting the control tests though
     assign opcode = instruction[31:26];
     assign func = instruction[5:0];
 
@@ -276,9 +278,8 @@ module control(
                 alu_op = `OP_OR;
             end
             `FUNC_SLT: begin
-                $display("FUNC SLT is not implemented");
                 reg_write = 1;
-                alu_op = `OP_SUB;
+                alu_op = `OP_SLT;
             end
             `FUNC_SLL: begin
                 reg_write = 1;
