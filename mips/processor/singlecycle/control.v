@@ -45,93 +45,180 @@ module control(
 
     // Doing it the easy way now, will rewrite if in the future it seems useful to do
     always @(instruction) begin
-        shamt = 0;
-        is_branch = 0;
-        is_jump = 0;
+
+        // Reasonable defaults
         reg_write = 0;
-        alu_src = `ALU_SRC_DATA_B;
+        reg_dst = 0;
+        write_reg31 = 0;
+        link = 0;
+        alu_src = 0;
+        alu_op = `OP_ADD;
+        ext_op = 0;
+        mem_write = 0;
+        mem_to_reg = 0;
+        is_jump = 0;
+        zero_branch = 0;
+        need_zero = 0;
+        status_branch = 0;
+        need_st_Z = 0;
+        pc_select = 2'b0;
 
         case (opcode)
             `OPCODE_ADDI: begin
-                alu_op = `OP_ADD;
-                alu_src = `ALU_SRC_SEXT_IMM16;
-                addr_in = rt;
-                addr_a = rs;
                 reg_write = 1;
+                reg_dst = 1;
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
             end
             `OPCODE_ANDI: begin
-                alu_op = `OP_AND;
-                alu_src = `ALU_SRC_ZEXT_IMM16;
-                addr_in = rt;
-                addr_a = rs;
                 reg_write = 1;
+                reg_dst = 1;
+                alu_src = 1;
+                alu_op = `OP_AND;
             end
             `OPCODE_BALMN: begin
-                $display("OPCODE_BALMN not implemented");
+                reg_dst = 1;
+                link = 1;
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                status_branch = 1;
+                pc_select = 2'b11;
             end
             `OPCODE_BALMZ: begin
-                $display("OPCODE_BALMZ not implemented");
+                reg_dst = 1;
+                link = 1;
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b11;
             end
             `OPCODE_BEQ: begin
-                $display("OPCODE_BEQ not implemented");
+                alu_op = `OP_SUB;
+                zero_branch = 1;
+                need_zero = 1;
+                pc_select = 2'b00;
             end
             `OPCODE_BEQAL: begin
-                $display("OPCODE_BEQAL not implemented");
+                write_reg31 = 1;
+                link = 1;
+                alu_op = `OP_SUB;
+                zero_branch = 1;
+                need_zero = 1;
+                pc_select = 2'b00;
             end
             `OPCODE_BMN: begin
-                $display("OPCODE_BMN not implemented");
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                status_branch = 1;
+                need_st_Z = 0;
+                pc_select = 2'b11;
             end
             `OPCODE_BMZ: begin
-                $display("OPCODE_BMZ not implemented");
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b11;
             end
             `OPCODE_BNE: begin
-                $display("OPCODE_BNE not implemented");
+                alu_op = `OP_SUB;
+                zero_branch = 1;
+                need_zero = 0;
+                pc_select = 2'b00;
             end
             `OPCODE_BNEAL: begin
-                $display("OPCODE_BNEAL not implemented");
+                write_reg31 = 1;
+                link = 1;
+                alu_op = `OP_SUB;
+                zero_branch = 1;
+                need_zero = 0;
+                pc_select = 2'b00;
             end
             `OPCODE_JALM: begin
-                $display("OPCODE_JALM not implemented");
+                reg_dst = 1;
+                link = 1;
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                is_jump = 1;
+                pc_select = 2'b11;
             end
             `OPCODE_JALPC: begin
-                $display("OPCODE_JALPC not implemented");
+                reg_dst = 1;
+                link = 1;
+                is_jump = 1;
+                pc_select = 2'b00;
             end
             `OPCODE_JM: begin
-                $display("OPCODE_JM not implemented");
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                is_jump = 1;
+                pc_select = 2'b11;
             end
             `OPCODE_JPC: begin
-                $display("OPCODE_JPC not implemented");
+                is_jump = 1;
+                pc_select = 2'b00;
             end
             `OPCODE_LW: begin
-                $display("OPCODE_LW not implemented");
+                reg_write = 1;
+                reg_dst = 1;
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                mem_to_reg = 1;
             end
             `OPCODE_ORI: begin
-                alu_op = `OP_OR;
-                alu_src = `ALU_SRC_ZEXT_IMM16;
-                addr_in = rt;
-                addr_a = rs;
                 reg_write = 1;
+                reg_dst = 1;
+                alu_src = 1;
+                alu_op = `OP_OR;
             end
             `OPCODE_SW: begin
-                $display("OPCODE_SW not implemented");
+                alu_src = 1;
+                alu_op = `OP_ADD;
+                ext_op = 1;
+                mem_write = 1;
             end
             `OPCODE_BALN: begin
-                $display("OPCODE_BALN not implemented");
+                write_reg31 = 1;
+                link = 1;
+                status_branch = 1;
+                pc_select = 2'b01;
             end
             `OPCODE_BALZ: begin
-                $display("OPCODE_BALZ not implemented");
+                write_reg31 = 1;
+                link = 1;
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b01;
             end
             `OPCODE_BN: begin
-                $display("OPCODE_BN not implemented");
+                status_branch = 1;
+                pc_select = 2'b01;
             end
             `OPCODE_BZ: begin
-                $display("OPCODE_BZ not implemented");
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b01;
             end
             `OPCODE_JAL: begin
-                $display("OPCODE_JAL not implemented");
+                write_reg31 = 1;
+                link = 1;
+                is_jump = 1;
+                pc_select = 2'b01;
             end
             `OPCODE_J: begin
+                reg_write = 0;
                 is_jump = 1;
+                status_branch = 0;
+                pc_select = 2'b01;
             end
 
             `OPCODE_RTYPE: begin
@@ -141,64 +228,69 @@ module control(
     end
 
     always @(instruction) if (opcode == `OPCODE_RTYPE) begin
-        // defaults
-        addr_a = rs;
-        addr_b = rt;
-        addr_in = rd;
-        reg_write = 1;
-        alu_src = `ALU_SRC_DATA_B;
-        shamt = 0;
 
         case (func)
             `FUNC_ADD: begin
+                reg_write = 1;
                 alu_op = `OP_ADD;
             end
             `FUNC_AND: begin
+                reg_write = 1;
                 alu_op = `OP_AND;
             end
             `FUNC_BALRN: begin
-                $display("FUNC_BALRN not implemented");
+                link = 1;
+                status_branch = 1;
+                pc_select = 2'b10;
             end
             `FUNC_BALRZ: begin
-                $display("FUNC_BALRZ not implemented");
+                link = 1;
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b10;
             end
             `FUNC_BRN: begin
-                $display("FUNC_BRN not implemented");
+                status_branch = 1;
+                pc_select = 2'b10;
             end
             `FUNC_BRZ: begin
-                $display("FUNC_BRZ not implemented");
+                status_branch = 1;
+                need_st_Z = 1;
+                pc_select = 2'b10;
             end
             `FUNC_JALR: begin
-                $display("FUNC_JALR not implemented");
+                link = 1;
+                is_jump = 1;
+                pc_select = 2'b10;
             end
             `FUNC_JR: begin
-                reg_write = 0;
-                $display("FUNC_JR not implemented");
+                is_jump = 1;
+                pc_select = 2'b10;
             end
             `FUNC_NOR: begin
+                reg_write = 1;
                 alu_op = `OP_NOR;
             end
             `FUNC_OR: begin
+                reg_write = 1;
                 alu_op = `OP_OR;
             end
             `FUNC_SLT: begin
-                alu_op = `OP_SLT;
-            end
-            `FUNC_SLL: begin
-                alu_op = `OP_SLL;
-                shamt = shift_amount;
-                addr_a = rt;
-            end
-            `FUNC_SRL: begin
-                alu_op = `OP_SRL;
-                shamt = shift_amount;
-                addr_a = rt;
-            end
-            `FUNC_SUB: begin
+                $display("FUNC SLT is not implemented");
+                reg_write = 1;
                 alu_op = `OP_SUB;
             end
-            default: begin
-                reg_write = 0;
+            `FUNC_SLL: begin
+                reg_write = 1;
+                alu_op = `OP_SLL;
+            end
+            `FUNC_SRL: begin
+                reg_write = 1;
+                alu_op = `OP_SRL;
+            end
+            `FUNC_SUB: begin
+                reg_write = 1;
+                alu_op = `OP_SUB;
             end
         endcase
     end

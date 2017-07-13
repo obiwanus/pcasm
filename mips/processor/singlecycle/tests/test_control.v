@@ -7,12 +7,6 @@ module test_control;
     reg error = 0;
 
     reg [31:0] instruction;
-    wire [4:0] addr_a, addr_b, addr_in, shamt;
-    wire [15:0] imm16;
-    wire [25:0] addr26;
-    wire is_jump, is_branch, reg_write;
-    wire [1:0] alu_src;
-    wire [2:0] alu_op;
 
     wire reg_write;
     wire reg_dst;
@@ -309,25 +303,45 @@ module test_control;
 
         // 000101 01010 01011 1111111111111100
         // bne     $t2, $t3, loop
-        // instruction = 32'b00010101010010111111111111111100;
-        // #1;
-        // `assertEq(addr_a, 5'b01010)
-        // `assertEq(addr_b, 5'b01011)
-        // `assertEq(imm16, 16'b1111111111111100)
-        // `assertEq(is_jump, 0)
-        // `assertEq(shamt, 0)
-        // `assertEq(alu_op, `OP_SUB)
+        instruction = 32'b00010101010010111111111111111100;
+        #1;
+        `assertEq(reg_write,        0)
+        // `assertEq(reg_dst,          0)
+        // `assertEq(write_reg31,      0)
+        // `assertEq(link,             0)
+        `assertEq(alu_src,          0)
+        `assertEq(alu_op,     `OP_SUB)
+        // `assertEq(ext_op,            )
+        `assertEq(mem_write,        0)
+        // `assertEq(mem_to_reg,       0)
+        `assertEq(is_jump,          0)
+        `assertEq(zero_branch,      1)
+        `assertEq(need_zero,        0)
+        `assertEq(status_branch,    0)
+        // `assertEq(need_st_Z,         )
+        `assertEq(pc_select,    0'b00)  // select offset
 
         // // sw      $s0, 0($t0)
+
+        // TODO: reassemble
         // instruction = 32'b00000000000000000100000000100000;
         // #1;
-        // `assertEq(addr_a, 5'b10000)  // value
-        // `assertEq(addr_b, 5'b01000)  // address
-        // `assertEq(imm16, 16'b0)      // offset
-        // `assertEq(is_jump, 0)
-        // `assertEq(zero_branch, 0)
-        // `assertEq(shamt, 0)
-        //  // write !== 1  ????????
+        // $stop;
+        // `assertEq(reg_write,        0)
+        // // `assertEq(reg_dst,          0)
+        // // `assertEq(write_reg31,      0)
+        // // `assertEq(link,             0)
+        // `assertEq(alu_src,          1)
+        // `assertEq(alu_op,     `OP_ADD)
+        // `assertEq(ext_op,           1)
+        // `assertEq(mem_write,        1)
+        // // `assertEq(mem_to_reg,       0)
+        // `assertEq(is_jump,          0)
+        // `assertEq(zero_branch,      0)
+        // // `assertEq(need_zero,        0)
+        // `assertEq(status_branch,    0)
+        // // `assertEq(need_st_Z,         )
+        // // `assertEq(pc_select,    0'b00)  // select offset
 
         // TODO:
         // balrn   0x17    rs, rd          if [z]=0, branch and link to rs, store return in rd (31 by default)
