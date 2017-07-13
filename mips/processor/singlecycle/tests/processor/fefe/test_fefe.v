@@ -9,8 +9,8 @@ module test_fefe;  // not covfefe
     processor CPU();
 
     initial begin
-        $readmemb("tests/processor/fefe/test_fefe_imem.dat", CPU.IFU.imemory.storage.bytes);
-        $readmemh("tests/processor/fefe/test_fefe_dmem.dat", CPU.dmemory.bytes);
+        $readmemb("tests/processor/fefe/fefe_imem.dat", CPU.IFU.imemory.storage.bytes);
+        $readmemh("tests/processor/fefe/fefe_dmem.dat", CPU.dmemory.bytes);
 
         repeat(19) @(posedge CPU.clk);
 

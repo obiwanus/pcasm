@@ -42,7 +42,7 @@ module processor;
                  alu_op, ext_op, mem_write, mem_to_reg, is_jump, zero_branch,
                  need_zero, status_branch, need_st_Z, pc_select);
     alu ALU(alu_out, alu_zout, alu_in1, alu_in2, alu_op, shamt);
-    ifu IFU(instruction, branch_taken, imm16, addr26, data_a, mem_data, zero, st_Z, pc_select,
+    ifu IFU(instruction, branch_taken, imm16, addr26, data_a, mem_data, alu_zout, st_Z, pc_select,
             is_jump, status_branch, need_st_Z, zero_branch, need_zero, clk);
 
     // split instruction into wires
