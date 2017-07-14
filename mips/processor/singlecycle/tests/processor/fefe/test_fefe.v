@@ -1,7 +1,8 @@
 /*
-* Tests the program 1_fefe.mips, which
+* Tests the program fefe.mips, which
 * puts 0xFEFE in the first 64 bytes in memory
 */
+`include "_const.v"
 `include "_assert.v"
 
 module test_fefe;  // not covfefe
@@ -10,7 +11,6 @@ module test_fefe;  // not covfefe
 
     initial begin
         $readmemb("tests/processor/fefe/fefe_imem.dat", CPU.IFU.imemory.storage.bytes);
-        $readmemh("tests/processor/fefe/fefe_dmem.dat", CPU.dmemory.bytes);
 
         repeat(9) @(posedge CPU.clk);
 

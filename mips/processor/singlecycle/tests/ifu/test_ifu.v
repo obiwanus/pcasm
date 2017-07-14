@@ -6,6 +6,7 @@ module test_ifu(input clk);
     // Outputs of IFU
     wire [31:0] instruction;
     wire branch_taken;
+    wire [31:0] pc_seq;
 
     // Status signals
     reg [15:0] imm16 = 0;
@@ -25,7 +26,7 @@ module test_ifu(input clk);
 
     reg error = 0;
 
-    ifu MUT(instruction, branch_taken, imm16, addr26, pc_reg, pc_mem, zero, st_Z, pc_select,
+    ifu MUT(instruction, branch_taken, pc_seq, imm16, addr26, pc_reg, pc_mem, zero, st_Z, pc_select,
             is_jump, status_branch, need_st_Z, zero_branch, need_zero, clk);
 
     localparam INSTR_0 = 32'b11001010000011110011001101010101;

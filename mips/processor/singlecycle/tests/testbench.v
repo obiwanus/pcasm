@@ -18,6 +18,7 @@ module testbench;
 
     // Processor tests
     test_fefe fefe();
+    test_memset memset();
 
     // ALU instruction tests
     test_addi addi();

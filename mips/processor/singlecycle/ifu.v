@@ -1,6 +1,7 @@
 module ifu(
     output [31:0] instruction,
     output branch_taken,
+    output [31:0] pc_seq_out,
 
     // Data signals
     input [15:0] imm16,
@@ -40,6 +41,7 @@ module ifu(
     xnor(st_Z_satisfied, st_Z, need_st_Z);
 
     assign pc_seq = pc + 4;
+    assign pc_seq_out = pc_seq;
     assign pc_offset = pc_seq + (sext_imm16 << 2);
     assign pc_addr26 = {pc[31:28], addr26, 2'b00};
 
