@@ -13,19 +13,6 @@
 				"*.wlf"
 			],
 			"path": "."
-		},
-		{
-			"path": "/home/iivanoff/projects/mips-single-cycle",
-			"file_exclude_patterns":
-			[
-				"*.mpf",
-				"*.bak",
-				"*.out",
-				"transcript",
-				"*.spj",
-				"*.mti",
-				"*.wlf"
-			],
 		}
 	]
 }
