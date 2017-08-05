@@ -6,6 +6,12 @@ ASFLAGS= -f elf -d ELF_TYPE
 CFLAGS= -m32
 CC=gcc
 
+asmfiles := $(shell find . -name "*.asm")
+objfiles := $(patsubst %.asm, %.o, $(asmfiles))
+outfiles := $(patsubst %.asm, %.out, $(asmfiles))
+
+all: $(outfiles)
+
 %.out : %.o
 	$(CC) $(CFLAGS) -o $@ driver.c $< asm_io.o
 
@@ -15,9 +21,9 @@ CC=gcc
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c
 
-asm_io.o : asm_io.asm
-	$(AS) $(ASFLAGS) asm_io.asm
+asm_io.o : asm_io.asmlib
+	$(AS) $(ASFLAGS) asm_io.asmlib
 
 clean :
-	rm *.o
-	rm *.out
+	rm -f *.o
+	rm -f *.out

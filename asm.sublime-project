@@ -10,7 +10,11 @@
 				"transcript",
 				"*.spj",
 				"*.mti",
-				"*.wlf"
+				"*.wlf",
+				"*.creator*",
+				"*.files",
+				"*.config",
+				"*.includes",
 			],
 			"path": "."
 		}
